@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Duda's iReady Math Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f0;--surface:#fff;--s2:#f0efe8;--s3:#e6e4db;
+  --border:#dddad0;--border2:#c8c5b8;
+  --text:#1c1b17;--text2:#5c5a52;--text3:#9a9890;
+  --accent:#2d5be3;--abg:#eef2fd;--alight:#d4e0fa;
+  --green:#1a8a5a;--gbg:#e8f7ef;
+  --red:#c0392b;--rbg:#fdf0ee;
+  --amber:#b07010;--ambg:#fdf6e0;
+  --purple:#6a3fcf;--pbg:#f0ecfd;
+  --r:8px;--r2:12px;--r3:16px;
+  --sh:0 1px 4px rgba(0,0,0,.07);--sh2:0 4px 16px rgba(0,0,0,.1);
+}
+[data-theme=dark]{
+  --bg:#111009;--surface:#1a1915;--s2:#222119;--s3:#2c2b22;
+  --border:#333228;--border2:#48473c;
+  --text:#f0ede3;--text2:#9a9888;--text3:#6a6860;
+  --accent:#6b8ef5;--abg:#151e40;--alight:#1e2e5a;
+  --green:#48c98a;--gbg:#0a2518;
+  --red:#e8675a;--rbg:#2d1410;
+  --amber:#e0a840;--ambg:#2a2008;
+  --purple:#9e78f8;--pbg:#1a1030;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
+button,input,select{font-family:'Outfit',sans-serif;font-size:14px}
+button{cursor:pointer;border:none;background:none}
+
+/* WIZARD */
+#wiz{position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.wcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r3);padding:2.4rem;width:100%;max-width:520px;box-shadow:var(--sh2)}
+.wlogo{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
+.wstep{display:none}.wstep.active{display:block}
+.wstep h2{font-size:20px;font-weight:700;margin-bottom:.3rem}
+.wsub{font-size:13px;color:var(--text2);margin-bottom:1.6rem;line-height:1.6}
+.wdots{display:flex;gap:5px;margin-bottom:1.2rem}
+.wdot{width:6px;height:6px;border-radius:50%;background:var(--border2)}
+.wdot.on{background:var(--accent)}.wdot.done{background:var(--green)}
+.field{margin-bottom:.9rem}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:.3rem}
+.field input,.field select{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.cls-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem}
+.cdot{width:22px;height:22px;border-radius:50%;flex-shrink:0;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center}
+.cls-row input{flex:1;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text)}
+.accel-row{display:flex;align-items:center;gap:.3rem;font-size:12px;color:var(--text2);white-space:nowrap}
+.accel-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--accent)}
+.info{background:var(--abg);border-radius:var(--r);padding:.65rem .9rem;font-size:12px;color:var(--accent);line-height:1.55;margin-top:.5rem}
+.wbtns{display:flex;gap:.7rem;margin-top:1.6rem}
+.btn{padding:9px 20px;border-radius:var(--r);font-size:13px;font-weight:600;transition:all .15s;cursor:pointer;border:1px solid transparent}
+.btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-p:hover{opacity:.87}
+.btn-s{background:var(--s2);color:var(--text);border-color:var(--border)}.btn-s:hover{background:var(--s3)}
+.btn-d{background:var(--rbg);color:var(--red);border-color:var(--red)}
+.btn-sm{padding:5px 12px;font-size:12px}
+
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh}
+#app.on{display:flex}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.6rem 1.2rem;display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:200;box-shadow:var(--sh);flex-wrap:wrap}
+.logo{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:-.01em;white-space:nowrap;flex-shrink:0}
+.logo span{color:var(--text2);font-weight:400}
+.navtabs{display:flex;gap:3px}
+.navtab{padding:6px 14px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--text2);border:1px solid transparent;transition:all .12s}
+.navtab:hover{background:var(--s2);color:var(--text)}
+.navtab.on{background:var(--abg);color:var(--accent);border-color:var(--alight)}
+.topright{display:flex;gap:.5rem;margin-left:auto;align-items:center}
+.icobtn{width:32px;height:32px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);color:var(--text2);font-size:14px;cursor:pointer;transition:all .12s}
+.icobtn:hover{background:var(--s3)}
+
+/* PAGES */
+.page{display:none;padding:1.2rem;max-width:1600px;margin:0 auto;width:100%}
+.page.on{display:block}
+
+/* CLASS HEADER */
+.chead{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem;flex-wrap:wrap}
+.ctabs{display:flex;gap:.4rem;flex-wrap:wrap}
+.ctab{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all .12s;display:flex;align-items:center;gap:5px}
+.ctab:hover{border-color:var(--border2);color:var(--text)}
+.ctab.on{background:var(--abg);border-color:var(--accent);color:var(--accent)}
+.cdotsmall{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.yrsel{padding:6px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:13px}
+
+/* BANNER */
+.banner{background:var(--abg);border:1px solid var(--alight);border-radius:var(--r2);padding:.65rem 1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.btext{font-size:13px;color:var(--accent);font-weight:500;flex:1}
+.bsub{font-size:12px;color:var(--text2)}
+
+/* IXL LINK */
+.ixl-link{display:inline-flex;align-items:center;gap:.4rem;font-size:12px;color:var(--green);text-decoration:none;font-weight:500;padding:.3rem .7rem;border:1px solid var(--green);border-radius:var(--r);transition:all .12s}
+.ixl-link:hover{background:var(--gbg)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.7rem;margin-bottom:.9rem}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:.9rem 1.1rem;box-shadow:var(--sh)}
+.sval{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.slbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-top:2px}
+.ssub{font-size:12px;color:var(--text2);margin-top:.3rem}
+.sdelta{font-size:12px;font-weight:600;margin-top:.2rem}
+.up{color:var(--green)}.same{color:var(--text3)}
+.pbg{height:5px;border-radius:3px;background:var(--s2);margin-top:.4rem;overflow:hidden}
+.pfill{height:5px;border-radius:3px;transition:width .4s}
+.chip{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.chip.g{background:var(--gbg);color:var(--green)}
+.chip.a{background:var(--ambg);color:var(--amber)}
+.chip.r{background:var(--rbg);color:var(--red)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.6rem;font-size:12px;color:var(--text2)}
+.pgrid b{color:var(--text)}
+
+/* TABLE */
+.twrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:auto;box-shadow:var(--sh)}
+table{width:100%;border-collapse:collapse;min-width:500px}
+thead{position:sticky;top:0;z-index:20}
+th{background:var(--s2);border-bottom:2px solid var(--border);border-right:1px solid var(--border);padding:.4rem .55rem;font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;letter-spacing:.04em}
+th:first-child{position:sticky;left:0;z-index:21;background:var(--s2);min-width:230px}
+th.sc{text-align:center;min-width:76px;max-width:95px;white-space:normal;line-height:1.2;font-size:10px}
+th.score-h{text-align:center;font-size:10px;min-width:68px}
+td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:.32rem .55rem;vertical-align:middle}
+td:first-child{position:sticky;left:0;background:var(--surface);z-index:5;min-width:230px}
+.uhdr td{padding:0;background:var(--s2)}
+.uhdr td:first-child{background:var(--s2)}
+.urow{display:flex;align-items:center;gap:.5rem;padding:.45rem .8rem}
+.ubar{width:4px;height:18px;border-radius:2px;flex-shrink:0}
+.utitle{font-size:12px;font-weight:600;flex:1;letter-spacing:.02em}
+.umeta{font-size:11px;color:var(--text3);margin-left:auto}
+.ubadge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.b6{background:var(--abg);color:var(--accent)}
+.b7{background:var(--gbg);color:var(--green)}
+.b8{background:var(--pbg);color:var(--purple)}
+.lrow:hover td{background:var(--s2)}
+.lrow:hover td:first-child{background:var(--s2)}
+.lrow.utrow td:first-child{border-left:3px solid var(--purple)}
+.lnum{font-size:10px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+.ltitle{font-size:13px;line-height:1.3;margin-top:1px}
+.lpct{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3);margin-top:1px}
+.scell{text-align:center;vertical-align:middle}
+.sccell{text-align:center;vertical-align:middle;background:color-mix(in srgb,var(--gbg) 40%,transparent)}
+.scorecell{text-align:center;vertical-align:middle}
+.cb{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);background:var(--bg);cursor:pointer;-webkit-appearance:none;appearance:none;transition:all .12s;display:inline-block;position:relative;vertical-align:middle}
+.cb:checked{background:var(--accent);border-color:var(--accent)}
+.cb:checked::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:800}
+.cb.cc:checked{background:var(--green);border-color:var(--green)}
+.cb.ut:checked{background:var(--purple);border-color:var(--purple)}
+.na{color:var(--border);text-align:center;font-size:13px}
+.score-inp{width:52px;padding:3px 4px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);text-align:center;font-size:12px;font-family:'JetBrains Mono',monospace}
+.score-inp:focus{outline:none;border-color:var(--accent)}
+
+/* OVERVIEW */
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-bottom:1.2rem}
+.ovcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;box-shadow:var(--sh)}
+.ovchead{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem}
+.ovdot{width:12px;height:12px;border-radius:50%}
+.ovname{font-size:15px;font-weight:700}
+.ovpct{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.ovsub{font-size:12px;color:var(--text2);margin-top:.2rem}
+.ovdelta{font-size:12px;font-weight:600;margin-top:.2rem}
+.ovubars{margin-top:.8rem;display:flex;flex-direction:column;gap:.4rem}
+.ovurow{display:flex;align-items:center;gap:.4rem;font-size:11px}
+.ovuname{color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+.ovubg{flex:1;background:var(--s2);border-radius:3px;height:5px;overflow:hidden;min-width:50px}
+.ovufill{height:5px;border-radius:3px;transition:width .4s}
+.ovupct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);width:28px;text-align:right}
+.score-sum{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;box-shadow:var(--sh);margin-bottom:1.2rem;overflow:auto}
+.score-sum h3{font-size:14px;font-weight:600;margin-bottom:.9rem}
+.stbl{width:100%;border-collapse:collapse;font-size:12px}
+.stbl th{text-align:left;padding:.35rem .6rem;border-bottom:1px solid var(--border);font-weight:600;color:var(--text2);font-size:11px}
+.stbl td{padding:.35rem .6rem;border-bottom:1px solid var(--border);color:var(--text)}
+.spill{display:inline-block;padding:2px 8px;border-radius:10px;font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace}
+.sp-hi{background:var(--gbg);color:var(--green)}
+.sp-mid{background:var(--ambg);color:var(--amber)}
+.sp-lo{background:var(--rbg);color:var(--red)}
+.sp-na{background:var(--s2);color:var(--text3)}
+.ctblwrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:auto;box-shadow:var(--sh)}
+.ctblwrap th{font-size:11px;padding:.5rem .8rem;background:var(--s2);border-bottom:2px solid var(--border);border-right:1px solid var(--border);color:var(--text2);font-weight:600}
+.ctblwrap td{font-size:12px;padding:.5rem .8rem;border-bottom:1px solid var(--border);border-right:1px solid var(--border);color:var(--text)}
+
+/* SETTINGS */
+.setsec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;margin-bottom:.9rem;box-shadow:var(--sh)}
+.setsec h3{font-size:14px;font-weight:600;margin-bottom:.9rem}
+.setrow{display:flex;align-items:center;gap:1rem;padding:.45rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.setrow:last-child{border-bottom:none}
+.setlbl{font-size:13px;color:var(--text2);flex:1;min-width:150px}
+.setinp{padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:13px;min-width:180px}
+.setinp:focus{outline:none;border-color:var(--accent)}
+.cls-set{display:flex;align-items:center;gap:.7rem;padding:.4rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.cls-set:last-child{border-bottom:none}
+.expbtns{display:flex;gap:.6rem;flex-wrap:wrap}
+.disc{font-size:10px;color:var(--text3);padding:.35rem 1rem;text-align:center;border-top:1px solid var(--border);margin-top:auto}
+.toast{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--text);color:var(--bg);padding:.6rem 1.1rem;border-radius:var(--r);font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:all .22s;pointer-events:none;z-index:9999;max-width:260px}
+.toast.on{opacity:1;transform:translateY(0)}
+.celeb{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:#fff;padding:.55rem 1.4rem;border-radius:20px;font-size:14px;font-weight:700;opacity:0;transition:all .25s;pointer-events:none;z-index:9998;white-space:nowrap}
+.celeb.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.drop{border:2px dashed var(--border2);border-radius:var(--r);padding:1.2rem;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;transition:all .15s}
+.drop:hover{border-color:var(--accent);color:var(--accent);background:var(--abg)}
+
+/* ── DASHBOARD ── */
+.db-toprow{display:grid;grid-template-columns:auto 1fr auto;gap:.7rem;margin-bottom:.7rem;align-items:start}
+@media(max-width:680px){.db-toprow{grid-template-columns:1fr}}
+.db-clock-card{text-align:center;min-width:160px}
+.db-clock{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;font-family:"JetBrains Mono",monospace;color:var(--text);line-height:1}
+.db-date{font-size:11px;color:var(--text3);margin-top:.25rem}
+.db-nextcls{font-size:11px;color:var(--text2);margin-top:.25rem;min-height:14px}
+.db-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3)}
+.db-two-col{display:grid;grid-template-columns:320px 1fr;gap:.7rem;align-items:start}
+@media(max-width:800px){.db-two-col{grid-template-columns:1fr}}
+
+/* Checklist */
+.ck-item{display:flex;align-items:center;gap:.5rem;padding:.45rem .4rem;border-radius:var(--r);border:1px solid transparent;cursor:pointer;transition:all .12s;user-select:none}
+.ck-item:hover{background:var(--s2)}
+.ck-item.checked{background:var(--abg);border-color:var(--alight)}
+.ck-check{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border2);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;transition:all .12s}
+.ck-item.checked .ck-check{background:var(--accent);border-color:var(--accent)}
+.ck-label{font-size:13px;color:var(--text);flex:1}
+.ck-item.checked .ck-label{color:var(--accent);font-weight:500}
+.ck-emoji{font-size:14px;flex-shrink:0}
+
+/* Plan items */
+.plan-item{display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);margin-bottom:.35rem;flex-wrap:wrap}
+.plan-item.is-station{border-color:var(--green);background:color-mix(in srgb,var(--gbg) 30%,var(--surface))}
+.plan-color{width:4px;align-self:stretch;border-radius:2px;flex-shrink:0;min-height:24px}
+.plan-name{font-size:13px;font-weight:500;color:var(--text);flex:1;min-width:80px}
+.plan-min-inp{width:52px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:12px;text-align:center;font-family:"JetBrains Mono",monospace}
+.plan-min-inp:focus{outline:none;border-color:var(--accent)}
+.plan-sta-toggle{padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--s2);color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .12s}
+.plan-sta-toggle.active{background:var(--gbg);border-color:var(--green);color:var(--green)}
+.plan-del{color:var(--red);cursor:pointer;font-size:14px;padding:2px 5px;border-radius:4px;flex-shrink:0;opacity:.5;transition:opacity .12s}
+.plan-del:hover{opacity:1;background:var(--rbg)}
+.sta-detail{width:100%;padding:.4rem .4rem 0 .5rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.sta-inp{flex:1;min-width:120px;padding:4px 7px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:12px}
+.sta-inp:focus{outline:none;border-color:var(--green)}
+
+/* Timer */
+.db-timer-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;box-shadow:var(--sh2);text-align:center;margin-bottom:.6rem}
+.db-phase-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text3);margin-bottom:.2rem}
+.db-phase-name{font-size:17px;font-weight:700;color:var(--text);margin-bottom:.3rem;min-height:24px}
+.db-timer-dig{font-size:84px;font-weight:800;font-variant-numeric:tabular-nums;font-family:"JetBrains Mono",monospace;line-height:1;color:var(--accent);letter-spacing:-.03em;transition:color .3s}
+.db-timer-dig.warn{color:var(--amber)}
+.db-timer-dig.urgent{color:var(--red)}
+.db-progress{height:7px;border-radius:4px;background:var(--s2);overflow:hidden;margin:.5rem 0}
+.db-progress-fill{height:7px;border-radius:4px;background:var(--accent);transition:width .5s}
+.db-timer-btns{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem}
+.db-strip{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:.4rem}
+.strip-item{flex:1;min-width:50px;padding:4px 7px;border-radius:5px;border:1px solid var(--border);background:var(--s2);font-size:11px;text-align:center;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strip-done{opacity:.35;text-decoration:line-through}
+.strip-active{font-weight:700;color:#fff;border-color:transparent}
+
+/* Schedule */
+.cls-sched-row{display:flex;align-items:center;gap:.6rem;padding:.45rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.cls-sched-row:last-child{border-bottom:none}
+.tminp{padding:5px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:13px}
+.tminp:focus{outline:none;border-color:var(--accent)}
+.cls-status{font-size:11px;padding:2px 9px;border-radius:10px;font-weight:700;white-space:nowrap}
+.cs-now{background:var(--gbg);color:var(--green)}
+.cs-next{background:var(--ambg);color:var(--amber)}
+.cs-done{background:var(--s2);color:var(--text3)}
+.cs-wait{background:var(--s2);color:var(--text3)}
+</style>
+</head>
+<body>
+
+<!-- WIZARD -->
+<div id="wiz">
+<div class="wcard">
+  <div class="wlogo">📚 Duda's iReady Math Tracker</div>
+  <div class="wdots" id="wdots"></div>
+  <div class="wstep active" id="ws1">
+    <h2>What grade do you teach?</h2>
+    <p class="wsub">Only your grade's content will load. This can be changed in Settings.</p>
+    <div class="field"><label>Grade level</label>
+      <select id="wGrade" onchange="wGradeChange()">
+        <option value="K">Kindergarten</option>
+        <option value="1">1st Grade</option><option value="2">2nd Grade</option>
+        <option value="3">3rd Grade</option><option value="4">4th Grade</option>
+        <option value="5">5th Grade</option><option value="6" selected>6th Grade</option>
+        <option value="7">7th Grade</option><option value="8">8th Grade</option>
+      </select>
+    </div>
+    <div id="gnote" class="info" style="display:none"></div>
+  </div>
+  <div class="wstep" id="ws2">
+    <h2>How many classes do you teach?</h2>
+    <p class="wsub">Name your classes and mark any as Accelerated if they cover extra grade-level content.</p>
+    <div class="field"><label>Number of classes</label>
+      <select id="wNum" onchange="buildCls()">
+        <option>1</option><option>2</option><option value="3" selected>3</option>
+        <option>4</option><option>5</option>
+      </select>
+    </div>
+    <div class="field"><label>Class names</label><div id="clsInputs"></div></div>
+    <div id="anote" class="info" style="display:none"></div>
+  </div>
+  <div class="wstep" id="ws3">
+    <h2>School year details</h2>
+    <p class="wsub">Used to calculate pacing and whether you're on track.</p>
+    <div class="field"><label>School year</label>
+      <select id="wYear">
+        <option value="2024-25">2024–25</option><option value="2025-26" selected>2025–26</option>
+        <option value="2026-27">2026–27</option><option value="2027-28">2027–28</option>
+      </select>
+    </div>
+    <div class="field"><label>First day of school</label><input type="date" id="wFirst" value="2025-08-25"></div>
+    <div class="field"><label>Last day of school</label><input type="date" id="wLast" value="2026-05-22"></div>
+    <div class="field"><label>Total school days</label><input type="number" id="wDays" value="180" min="100" max="220"></div>
+  </div>
+  <div class="wbtns">
+    <button class="btn btn-s" id="wBack" onclick="wNav(-1)" style="display:none">← Back</button>
+    <button class="btn btn-p" id="wNext" onclick="wNav(1)">Get Started →</button>
+  </div>
+</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="logo">Duda's <span>iReady Tracker</span></div>
+    <nav class="navtabs">
+      <button class="navtab" onclick="goPage('dashboard')">📋 Dashboard</button>
+      <button class="navtab on" onclick="goPage('tracker')">Tracker</button>
+      <button class="navtab" onclick="goPage('overview')">Overview</button>
+      <button class="navtab" onclick="goPage('settings')">Settings</button>
+    </nav>
+    <div class="topright">
+      <button class="icobtn" onclick="toggleTheme()" id="themeBtn" title="Toggle light/dark">☀</button>
+      <button class="icobtn" onclick="exportJSON()" title="Export JSON backup">⬇</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="page-dashboard">
+
+    <!-- Top info row -->
+    <div class="db-toprow">
+      <div class="db-card db-clock-card">
+        <div class="db-clock" id="db-clock">--:--:--</div>
+        <div class="db-date" id="db-date"></div>
+        <div class="db-nextcls" id="db-nextcls"></div>
+      </div>
+      <div class="db-card" style="flex:1">
+        <div class="db-sec">Class &amp; Period</div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem" id="db-classpills"></div>
+        <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+          <label style="font-size:12px;color:var(--text3)">Period length:</label>
+          <input type="number" id="db-period-len" class="tminp" value="72" min="20" max="180" style="width:65px" oninput="dbPeriodChange()">
+          <span style="font-size:12px;color:var(--text3)">min</span>
+          <span id="db-time-left-badge" style="font-size:12px;font-weight:600;color:var(--green)"></span>
+        </div>
+      </div>
+      <div class="db-card" style="text-align:center;min-width:150px">
+        <div class="db-sec">Resources</div>
+        <a id="db-ixl-link" href="#" target="_blank" rel="noopener" class="btn btn-s btn-sm" style="text-decoration:none;display:block;margin-bottom:.4rem">🔗 IXL Skill Plan</a>
+        <button class="btn btn-s btn-sm" onclick="goPage('tracker')" style="width:100%">📋 Tracker</button>
+      </div>
+    </div>
+
+    <!-- Two-column layout: checklist left, plan right -->
+    <div class="db-two-col">
+
+      <!-- LEFT: Activity checklist -->
+      <div class="db-card">
+        <div class="db-sec" style="margin-bottom:.6rem">Today&#39;s Activities — check to add</div>
+        <div id="db-checklist"></div>
+      </div>
+
+      <!-- RIGHT: Today's plan + timer -->
+      <div>
+        <!-- Plan header -->
+        <div class="db-card" style="margin-bottom:.7rem">
+          <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:700;color:var(--text)">📅 Today&#39;s Plan</span>
+            <span id="db-plan-total" style="font-size:12px;color:var(--text3)"></span>
+            <div style="margin-left:auto;display:flex;gap:.4rem;flex-wrap:wrap">
+              <button class="btn btn-p btn-sm" id="db-run-btn" onclick="dbRun()">▶ Start Timer</button>
+              <button class="btn btn-s btn-sm" onclick="dbOpenProjector()">🖥 Projector</button>
+              <button class="btn btn-d btn-sm" onclick="dbClearAll()">✕ Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan items -->
+        <div id="db-plan-list" style="margin-bottom:.7rem"></div>
+
+        <!-- Timer panel (shown when running) -->
+        <div id="db-timer-panel" style="display:none">
+          <div class="db-timer-wrap">
+            <div class="db-phase-label" id="db-phase-label">—</div>
+            <div class="db-phase-name" id="db-phase-name">—</div>
+            <div class="db-timer-dig" id="db-timer">00:00</div>
+            <div class="db-progress"><div class="db-progress-fill" id="db-prog-fill" style="width:0%"></div></div>
+            <div id="db-station-row" style="display:none;gap:.5rem;margin-top:.6rem;flex-wrap:wrap"></div>
+            <div class="db-timer-btns">
+              <button class="btn btn-p" id="db-pause-btn" onclick="dbPauseResume()">⏸ Pause</button>
+              <button class="btn btn-s" onclick="dbNextItem()">⏭ Next</button>
+              <button class="btn btn-d btn-sm" onclick="dbStop()">✕ Stop</button>
+            </div>
+          </div>
+          <!-- Strip -->
+          <div class="db-strip" id="db-strip"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Class schedule -->
+    <div class="db-card" style="margin-top:.7rem">
+      <div class="db-sec" style="margin-bottom:.5rem">Class Schedule</div>
+      <div id="db-class-schedule"></div>
+    </div>
+
+  </div>
+
+  <!-- PROJECTOR (fullscreen overlay) -->
+  <div id="projector-overlay" style="display:none;position:fixed;inset:0;background:#0d1117;z-index:5000;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Outfit',sans-serif;padding:2rem">
+    <button onclick="dbCloseProjector()" style="position:absolute;top:1.2rem;right:1.2rem;background:rgba(255,255,255,.12);border:none;color:#fff;padding:.4rem 1rem;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">✕ Close</button>
+    <div style="font-size:15px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin-bottom:.4rem;text-align:center" id="proj-label">—</div>
+    <div style="font-size:56px;font-weight:800;text-align:center;margin-bottom:.2rem;line-height:1.1;max-width:900px" id="proj-name">—</div>
+    <div style="font-size:110px;font-weight:900;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:.5rem;color:#fff" id="proj-timer">00:00</div>
+    <div style="font-size:16px;opacity:.45;margin-bottom:2rem;text-align:center" id="proj-sub">—</div>
+    <div id="proj-stations" style="display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;max-width:1300px"></div>
+  </div>
+  <!-- TRACKER -->
+  <div class="page on" id="page-tracker">
+    <div class="chead">
+      <div class="ctabs" id="ctabs"></div>
+      <select class="yrsel" id="yrsel" onchange="S.year=this.value;SAVE();renderTracker();renderStats()"></select>
+      <a class="ixl-link" id="ixlLink" href="#" target="_blank" rel="noopener">🔗 IXL Skills</a>
+    </div>
+    <div class="banner" id="banner"></div>
+    <div class="stats" id="stats"></div>
+    <div id="tbl"></div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="page" id="page-overview">
+    <div class="ovgrid" id="ovcards"></div>
+    <div class="score-sum" id="scoresum"></div>
+    <div class="ctblwrap" id="ctbl"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="setsec">
+      <h3>School Year & Pacing</h3>
+      <div class="setrow"><span class="setlbl">First day of school</span><input type="date" class="setinp" id="sFirst" onchange="SS('firstDay',this.value)"></div>
+      <div class="setrow"><span class="setlbl">Last day of school</span><input type="date" class="setinp" id="sLast" onchange="SS('lastDay',this.value)"></div>
+      <div class="setrow"><span class="setlbl">Total school days</span><input type="number" class="setinp" id="sDays" min="100" max="220" onchange="SS('schoolDays',+this.value)"></div>
+    </div>
+    <div class="setsec"><h3>Class Names</h3><div id="clsSet"></div></div>
+    <div class="setsec">
+      <h3>Export &amp; Backup</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:.8rem">Export regularly to prevent data loss. Import JSON to restore all progress.</p>
+      <div class="expbtns">
+        <button class="btn btn-p btn-sm" onclick="exportJSON()">⬇ JSON Backup</button>
+        <button class="btn btn-s btn-sm" onclick="exportCSV()">⬇ CSV (Excel)</button>
+        <button class="btn btn-s btn-sm" onclick="exportPDF()">⬇ PDF Report</button>
+        <label class="btn btn-s btn-sm" style="cursor:pointer">⬆ Import JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+      </div>
+      <div style="margin-top:.8rem"><div class="drop" id="dropzone">Drop a JSON backup here or click Import JSON above</div></div>
+    </div>
+    <div class="setsec">
+      <h3>Reset Progress</h3>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap" id="resetBtns"></div>
+    </div>
+    <div class="setsec">
+      <h3>About</h3>
+      <p style="font-size:12px;color:var(--text2);line-height:1.7">
+        <strong>Duda's iReady Math Tracker</strong> is an independent tool for tracking lesson progress.<br>
+        ⚠️ <em>This is <strong>not</strong> an official product of Curriculum Associates or i-Ready®. Session names and counts are sourced from publicly available IXL skill alignment documents and may contain errors. Always verify against your official iReady Teacher Toolbox.</em>
+      </p>
+    </div>
+  </div>
+
+  <div class="disc">⚠️ Not affiliated with i-Ready® / Curriculum Associates · Session data sourced from IXL alignment documents — verify against your Teacher Toolbox</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="celeb" id="celeb"></div>
+
+<script>
+const CUR = {"K": {"name": "Kindergarten", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-k", "units": [{"u": 1, "title": "Position, Length, Height, and Sorting", "lessons": [{"n": 1, "title": "Describe Position", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 2, "title": "Describe and Compare Length and Height", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 3, "title": "Sort and Count Objects", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 2, "title": "Numbers to 5, Shapes, and Weight", "lessons": [{"n": 4, "title": "Count, Show, and Write Numbers to 5", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 5, "title": "Compare Numbers to 5", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 6, "title": "Three-Dimensional Shapes and Weight", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 3, "title": "Addition and Subtraction Within 5 and Shapes", "lessons": [{"n": 7, "title": "Add Within 5", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 8, "title": "Two-Dimensional Shapes", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 9, "title": "Subtract Within 5", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 10, "title": "Add and Subtract Within 5", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 4, "title": "Numbers to 10 and Shapes", "lessons": [{"n": 11, "title": "Count, Show, and Write Numbers 6 to 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 12, "title": "Compare Numbers to 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 13, "title": "Compose Shapes", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 14, "title": "Compose and Decompose 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 15, "title": "Find Number Partners for 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 5, "title": "Numbers to 100", "lessons": [{"n": 16, "title": "Count, Read, and Write Numbers 11 to 20", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 17, "title": "Count Within 100", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 18, "title": "Compose and Decompose 6 and 7", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 19, "title": "Compose and Decompose 8 and 9", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 6, "title": "Addition and Subtraction Within 10", "lessons": [{"n": 20, "title": "Add Within 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 21, "title": "Subtract Within 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 22, "title": "Add and Subtract to Solve Word Problems", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 7, "title": "Teen Numbers and Shapes", "lessons": [{"n": 23, "title": "Compose and Decompose Teen Numbers with Tools and Drawings", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 24, "title": "Build with Shapes", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 25, "title": "Compose and Decompose Teen Numbers with Symbols", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}]}, "1": {"name": "1st Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-1", "units": [{"u": 1, "title": "Relating Addition and Subtraction", "lessons": [{"n": 1, "title": "Number Partners for 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 2, "title": "Add and Subtract Within 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 3, "title": "Use Counting Strategies to Add and Subtract", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 4, "title": "Use Addition to Subtract", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 5, "title": "Solve Word Problems to 10", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 2, "title": "Addition and Subtraction Within 20", "lessons": [{"n": 6, "title": "Teen Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 7, "title": "Add Three Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 8, "title": "Make a Ten to Add", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 9, "title": "Use a Ten to Subtract", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 10, "title": "Doubles and Near Doubles", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 3, "title": "Solving Word Problems and Making Comparisons", "lessons": [{"n": 11, "title": "Solve Word Problems to 20", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 12, "title": "Solve Compare Problems", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 13, "title": "Collect and Compare Data", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 14, "title": "True and False Equations", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 4, "title": "Using Tens and Ones to Organize and Count", "lessons": [{"n": 15, "title": "Tens and Ones", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 16, "title": "Numbers to 120", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 17, "title": "Compare Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 5, "title": "Operations with Tens and Ones", "lessons": [{"n": 18, "title": "Add and Subtract Tens", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 19, "title": "Addition with Two-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 20, "title": "Add Two-Digit and One-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 21, "title": "Add Two-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}, {"u": 6, "title": "Geometry and Measurement", "lessons": [{"n": 22, "title": "Shapes", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 23, "title": "Break Shapes into Equal Parts", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 24, "title": "Tell Time", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 25, "title": "Compare and Order Lengths", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 26, "title": "Measure Length", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}, {"n": 27, "title": "Money", "sessions": ["Explore", "Develop", "Develop", "Refine", "Refine"]}]}]}, "2": {"name": "2nd Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-2", "units": [{"u": 1, "title": "Numbers Within 20: Addition, Subtraction, and Data", "lessons": [{"n": 1, "title": "Mental Math Strategies for Addition", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 2, "title": "Mental Math Strategies for Subtraction", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 3, "title": "Solve One-Step Word Problems", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 4, "title": "Draw and Use Bar Graphs and Picture Graphs", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 5, "title": "Solve Two-Step Word Problems", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 2, "title": "Numbers Within 100: Addition, Subtraction, Time, and Money", "lessons": [{"n": 6, "title": "Add Two-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 7, "title": "Subtract Two-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 8, "title": "Use Addition and Subtraction Strategies with Two-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 9, "title": "Solve Word Problems with Two-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 10, "title": "Solve Word Problems Involving Money", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 11, "title": "Tell and Write Time", "sessions": ["Explore", "Develop", "Refine"]}]}, {"u": 3, "title": "Numbers Within 1,000: Place Value, Addition, and Subtraction", "lessons": [{"n": 12, "title": "Understand Three-Digit Numbers", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 13, "title": "Read and Write Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 14, "title": "Compare Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 15, "title": "Mental Addition and Subtraction", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 16, "title": "Add Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 17, "title": "Subtract Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 18, "title": "Use Addition and Subtraction Strategies with Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 19, "title": "Add Several Two-Digit Numbers", "sessions": ["Explore", "Develop", "Refine"]}]}, {"u": 4, "title": "Length: Measurement, Addition and Subtraction, and Line Plots", "lessons": [{"n": 20, "title": "Measure in Inches and Centimeters", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 21, "title": "Measure in Feet and Meters", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 22, "title": "Understand Measurement with Different Units", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 23, "title": "Estimate and Measure Length", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 24, "title": "Compare Lengths", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 25, "title": "Add and Subtract Lengths", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 26, "title": "Add and Subtract on the Number Line", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 27, "title": "Read and Make Line Plots", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 5, "title": "Shapes and Arrays: Partitioning and Tiling Shapes, Arrays, Evens and Odds", "lessons": [{"n": 28, "title": "Recognize and Draw Shapes", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 29, "title": "Understand Partitioning Shapes into Halves, Thirds, and Fourths", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 30, "title": "Partition Rectangles", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 31, "title": "Add Using Arrays", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 32, "title": "Even and Odd Numbers", "sessions": ["Explore", "Develop", "Refine"]}]}]}, "3": {"name": "3rd Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-3", "units": [{"u": 1, "title": "Three-Digit Numbers: Place Value, Addition, and Subtraction", "lessons": [{"n": 1, "title": "Use Place Value to Round Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 2, "title": "Add Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 3, "title": "Subtract Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}]}, {"u": 2, "title": "Multiplication and Division: Concepts, Relationships, and Patterns", "lessons": [{"n": 4, "title": "Understand the Meaning of Multiplication", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 5, "title": "Multiply with 0, 1, 2, 5, and 10", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 6, "title": "Multiply with 3, 4, and 6", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 7, "title": "Multiply with 7, 8, and 9", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 8, "title": "Use Order and Grouping to Multiply", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 9, "title": "Use Place Value to Multiply", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 10, "title": "Understand the Meaning of Division", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 11, "title": "Understand How Multiplication and Division Are Connected", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 12, "title": "Multiplication and Division Facts", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 13, "title": "Understand Patterns", "sessions": ["Explore", "Develop", "Refine"]}]}, {"u": 3, "title": "Multiplication: Finding Area, Solving Word Problems, and Using Scaled Graphs", "lessons": [{"n": 14, "title": "Understand Area", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 15, "title": "Multiply to Find Area", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 16, "title": "Add Areas", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 17, "title": "Solve One-Step Word Problems Using Multiplication and Division", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 18, "title": "Solve Two-Step Word Problems Using the Four Operations", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 19, "title": "Scaled Graphs", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}]}, {"u": 4, "title": "Fractions: Equivalence and Comparison, Measurement, and Data", "lessons": [{"n": 20, "title": "Understand What a Fraction Is", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 21, "title": "Understand Fractions on a Number Line", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 22, "title": "Understand Equivalent Fractions", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 23, "title": "Find Equivalent Fractions", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 24, "title": "Understand Comparing Fractions", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 25, "title": "Use Symbols to Compare Fractions", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 26, "title": "Measure Length and Plot Data on Line Plots", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 5, "title": "Measurement: Time, Liquid Volume, and Mass", "lessons": [{"n": 27, "title": "Time", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 28, "title": "Liquid Volume", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 29, "title": "Mass", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 6, "title": "Shapes: Attributes and Categories, Perimeter and Area, and Partitioning", "lessons": [{"n": 30, "title": "Understand Categories of Shapes", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 31, "title": "Classify Quadrilaterals", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 32, "title": "Area and Perimeter of Shapes", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 33, "title": "Partition Shapes into Parts with Equal Areas", "sessions": ["Explore", "Develop", "Refine"]}]}]}, "4": {"name": "4th Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-4", "units": [{"u": 1, "title": "Whole Numbers: Place Value, Comparison, Addition, and Subtraction", "lessons": [{"n": 1, "title": "Understand Place Value", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 2, "title": "Compare Whole Numbers", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 3, "title": "Round Whole Numbers", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 4, "title": "Add Whole Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 5, "title": "Subtract Whole Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 2, "title": "Operations: Multiplication, Division, and Algebraic Thinking", "lessons": [{"n": 6, "title": "Understand Multiplication as a Comparison", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 7, "title": "Multiplication and Division in Word Problems", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 8, "title": "Multiples and Factors", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 9, "title": "Number and Shape Patterns", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 10, "title": "Model and Solve Multi-Step Problems", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 3, "title": "Multi-Digit Operations and Measurement: Multiplication, Division, Perimeter, and Area", "lessons": [{"n": 11, "title": "Multiply by One-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 12, "title": "Multiply by Two-Digit Numbers", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 13, "title": "Use Multiplication to Convert Measurements", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 14, "title": "Divide Three-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 15, "title": "Divide Four-Digit Numbers", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 16, "title": "Find Perimeter and Area", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 4, "title": "Fractions, Decimals, and Measurement: Addition, Subtraction, and Multiplication", "lessons": [{"n": 17, "title": "Understand Equivalent Fractions", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 18, "title": "Compare Fractions", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 19, "title": "Understand Fraction Addition and Subtraction", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 20, "title": "Add and Subtract Fractions", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 21, "title": "Add and Subtract Mixed Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 22, "title": "Add and Subtract Fractions in Line Plots", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 23, "title": "Understand Fraction Multiplication", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 24, "title": "Multiply Fractions by Whole Numbers", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 25, "title": "Fractions as Tenths and Hundredths", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 26, "title": "Relate Decimals and Fractions", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 27, "title": "Compare Decimals", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 28, "title": "Problems About Time and Money", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 29, "title": "Problems About Length, Liquid Volume, Mass, and Weight", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}]}, {"u": 5, "title": "Geometry and Measurement: Figures, Classification, and Symmetry", "lessons": [{"n": 30, "title": "Points, Lines, Rays, and Angles", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 31, "title": "Angles", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 32, "title": "Add and Subtract with Angles", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 33, "title": "Classify Two-Dimensional Figures", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 34, "title": "Symmetry", "sessions": ["Explore", "Develop", "Refine"]}]}]}, "5": {"name": "5th Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-5", "units": [{"u": 1, "title": "Whole Number Operations and Applications: Volume, Multiplication, and Division", "lessons": [{"n": 1, "title": "Understand Volume", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 2, "title": "Find Volume Using Unit Cubes", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 3, "title": "Find Volume Using Formulas", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 4, "title": "Multiply Multi-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 5, "title": "Divide Multi-Digit Numbers", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}]}, {"u": 2, "title": "Decimals and Fractions: Place Value, Addition, and Subtraction", "lessons": [{"n": 6, "title": "Understand Decimal Place Value", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 7, "title": "Understand Powers of 10", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 8, "title": "Read and Write Decimals", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 9, "title": "Compare and Round Decimals", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 10, "title": "Add Decimals", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 11, "title": "Subtract Decimals", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 12, "title": "Add Fractions", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 13, "title": "Subtract Fractions", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 14, "title": "Add and Subtract in Word Problems", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 3, "title": "More Decimals and Fractions: Multiplication and Division", "lessons": [{"n": 15, "title": "Multiply a Decimal by a Whole Number", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 16, "title": "Multiply Decimals", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 17, "title": "Divide Decimals", "sessions": ["Explore", "Develop", "Develop", "Develop", "Refine"]}, {"n": 18, "title": "Fractions as Division", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 19, "title": "Understand Multiplication by a Fraction", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 20, "title": "Multiply Fractions to Find Area", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 21, "title": "Understand Multiplication as Scaling", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 22, "title": "Multiply Fractions in Word Problems", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 23, "title": "Understand Division with Unit Fractions", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 24, "title": "Divide Unit Fractions in Word Problems", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 4, "title": "Measurement, Data, and Geometry: Converting Units, Using Data, and Classifying Figures", "lessons": [{"n": 25, "title": "Convert Measurement Units", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 26, "title": "Solve Word Problems Involving Conversions", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 27, "title": "Make Line Plots and Interpret Data", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 28, "title": "Understand Categories of Two-Dimensional Figures", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 29, "title": "Classify Two-Dimensional Figures", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}, {"u": 5, "title": "Algebraic Thinking and the Coordinate Plane: Expressions, Graphing Points, Patterns and Relationships", "lessons": [{"n": 30, "title": "Evaluate, Write, and Interpret Expressions", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 31, "title": "Understand the Coordinate Plane", "sessions": ["Explore", "Develop", "Refine"]}, {"n": 32, "title": "Represent Problems in the Coordinate Plane", "sessions": ["Explore", "Develop", "Develop", "Refine"]}, {"n": 33, "title": "Analyze Patterns and Relationships", "sessions": ["Explore", "Develop", "Develop", "Refine"]}]}]}, "6": {"name": "6th Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-6", "units": [{"u": 1, "title": "Expressions & Equations: Area, Algebraic Expressions, and Exponents", "lessons": [{"n": 1, "title": "Find the Area of a Parallelogram", "sessions": ["Explore the Area of a Parallelogram", "Develop Finding the Area of a Parallelogram", "Refine Finding the Area of a Parallelogram"]}, {"n": 2, "title": "Find the Area of Triangles and Other Polygons", "sessions": ["Explore the Area of a Triangle", "Develop Finding the Area of a Triangle", "Develop Finding the Area of a Polygon", "Refine Finding the Area of Triangles and Other Polygons"]}, {"n": 3, "title": "Use Nets to Find Surface Area", "sessions": ["Explore Nets of Three-Dimensional Figures", "Develop Representing a 3D Figure with a Net", "Develop Finding the Surface Area of a 3D Figure", "Refine Using Nets to Find Surface Area"]}, {"n": 4, "title": "Work with Algebraic Expressions", "sessions": ["Explore Algebraic Expressions", "Develop Writing and Interpreting Algebraic Expressions", "Develop Evaluating Algebraic Expressions", "Refine Working with Algebraic Expressions"]}, {"n": 5, "title": "Write and Evaluate Expressions with Exponents", "sessions": ["Explore Expressions with Exponents", "Develop Writing and Evaluating Expressions with Exponents", "Develop Using Order of Operations with Exponents", "Refine Writing and Evaluating Expressions with Exponents"]}, {"n": 6, "title": "Find Greatest Common Factor and Least Common Multiple", "sessions": ["Explore Common Factors and Multiples", "Develop Finding the Greatest Common Factor", "Develop Finding the Least Common Multiple", "Refine Finding GCF and LCM"]}]}, {"u": 2, "title": "Decimals & Fractions: Base-Ten Operations, Division with Fractions, and Volume", "lessons": [{"n": 7, "title": "Add, Subtract, and Multiply Multi-Digit Decimals", "sessions": ["Explore Adding and Subtracting Multi-Digit Decimals", "Develop Using the Standard Algorithm to Add and Subtract Decimals", "Develop Using the Standard Algorithm to Multiply Decimals", "Refine Adding, Subtracting, and Multiplying Multi-Digit Decimals"]}, {"n": 8, "title": "Divide Whole Numbers and Multi-Digit Decimals", "sessions": ["Explore the Standard Algorithm for Division with Whole Numbers", "Develop Using the Standard Algorithm for Division", "Develop Expressing Remainders as Decimals", "Develop Dividing Multi-Digit Decimals", "Refine Dividing Whole Numbers and Multi-Digit Decimals"]}, {"n": 9, "title": "Understand Division with Fractions", "sessions": ["Explore Division with Fractions", "Develop Understanding of Division with Fractions", "Refine Ideas About Division with Fractions"]}, {"n": 10, "title": "Divide Fractions", "sessions": ["Explore Dividing Fractions", "Develop Dividing Fractions", "Develop Using Multiplication to Divide by a Fraction", "Refine Dividing Fractions"]}, {"n": 11, "title": "Solve Volume Problems with Fractions", "sessions": ["Explore Volume Problems with Fractions", "Develop Finding the Volume of a Prism with Fractional Edge Lengths", "Develop Solving Problems with Volume Formulas", "Refine Solving Volume Problems with Fractions"]}]}, {"u": 3, "title": "Ratio Reasoning: Ratio Concepts and Equivalent Ratios", "lessons": [{"n": 12, "title": "Understand Ratio Concepts", "sessions": ["Explore Ratio Concepts", "Develop Understanding of Ratio Concepts", "Refine Ideas About Ratio Concepts"]}, {"n": 13, "title": "Find Equivalent Ratios", "sessions": ["Explore Equivalent Ratios", "Develop Finding Equivalent Ratios", "Develop Graphing a Table of Equivalent Ratios", "Develop Using Equivalent Ratios", "Refine Finding Equivalent Ratios"]}, {"n": 14, "title": "Use Part-to-Part and Part-to-Whole Ratios", "sessions": ["Explore Ratios That Describe Parts of a Whole", "Develop Solving Ratio Problems Involving Parts and Wholes", "Develop Comparing Ratios", "Refine Using Part-to-Part and Part-to-Whole Ratios"]}]}, {"u": 4, "title": "Ratio Reasoning: Unit Rates and Percent", "lessons": [{"n": 15, "title": "Understand Rate Concepts", "sessions": ["Explore Rate Concepts", "Develop Understanding of Rate Concepts", "Refine Ideas About Rate Concepts"]}, {"n": 16, "title": "Use Unit Rates to Solve Problems", "sessions": ["Explore Unit Rates", "Develop Using Unit Rates to Find Equivalent Ratios", "Develop Using Unit Rates to Compare Ratios", "Develop Using Unit Rates to Convert Measurements", "Refine Using Unit Rates to Solve Problems"]}, {"n": 17, "title": "Understand Percents", "sessions": ["Explore Percents", "Develop Understanding of Percents", "Refine Ideas About Percents"]}, {"n": 18, "title": "Use Percents to Solve Problems", "sessions": ["Explore Percent Problems", "Develop Finding a Percent of a Quantity", "Develop Finding the Whole", "Refine Using Percents to Solve Problems"]}]}, {"u": 5, "title": "Algebraic Thinking: Equivalent Expressions and Equations with Variables", "lessons": [{"n": 19, "title": "Write and Identify Equivalent Expressions", "sessions": ["Explore Equivalent Expressions", "Develop Using the Distributive Property to Write Equivalent Expressions", "Develop Combining Like Terms", "Develop Identifying Equivalent Expressions", "Refine Writing and Identifying Equivalent Expressions"]}, {"n": 20, "title": "Understand Solutions of Equations", "sessions": ["Explore Solutions of Equations", "Develop Understanding of Solutions of Equations", "Refine Ideas About Solutions of Equations"]}, {"n": 21, "title": "Write and Solve One-Variable Equations", "sessions": ["Explore One-Variable Equations", "Develop Solving One-Variable Addition Equations", "Develop Solving One-Variable Multiplication Equations", "Develop Writing and Solving One-Variable Equations", "Refine Writing and Solving One-Variable Equations"]}, {"n": 22, "title": "Analyze Two-Variable Relationships", "sessions": ["Explore Two-Variable Relationships", "Develop Writing an Equation in Two Variables to Represent a Relationship", "Develop Analyzing the Relationship Between Two Variables", "Refine Analyzing Two-Variable Relationships"]}]}, {"u": 6, "title": "Positive & Negative Numbers: Absolute Value, Inequalities, and the Coordinate Plane", "lessons": [{"n": 23, "title": "Understand Positive and Negative Numbers", "sessions": ["Explore Positive and Negative Numbers", "Develop Understanding of Positive and Negative Numbers", "Refine Ideas About Positive and Negative Numbers"]}, {"n": 24, "title": "Order Positive and Negative Numbers", "sessions": ["Explore Ordering Positive and Negative Numbers", "Develop Comparing Positive and Negative Numbers", "Refine Ordering Positive and Negative Numbers"]}, {"n": 25, "title": "Understand Absolute Value", "sessions": ["Explore Absolute Value", "Develop Understanding of Absolute Value", "Refine Ideas About Absolute Value"]}, {"n": 26, "title": "Write and Graph One-Variable Inequalities", "sessions": ["Explore One-Variable Inequalities", "Develop Representing Inequalities", "Develop Writing and Graphing One-Variable Inequalities", "Develop Using Substitution to Identify Solutions of Inequalities", "Refine Writing and Graphing One-Variable Inequalities"]}, {"n": 27, "title": "Understand the Four-Quadrant Coordinate Plane", "sessions": ["Explore the Four-Quadrant Coordinate Plane", "Develop Understanding of the Four-Quadrant Coordinate Plane", "Refine Ideas About the Four-Quadrant Coordinate Plane"]}, {"n": 28, "title": "Solve Problems in the Coordinate Plane", "sessions": ["Explore Problems in the Coordinate Plane", "Develop Finding Distance Between Points on a Horizontal or Vertical Line", "Develop Solving Problems About Polygons in the Coordinate Plane", "Refine Solving Problems in the Coordinate Plane"]}]}, {"u": 7, "title": "Statistical Thinking: Data Distributions and Measures of Center and Variability", "lessons": [{"n": 29, "title": "Understand Statistical Questions and Data Distributions", "sessions": ["Explore Statistical Questions and Data Distributions", "Develop Understanding of Statistical Questions and Data Distributions", "Refine Ideas About Statistical Questions and Data Distributions"]}, {"n": 30, "title": "Use Dot Plots and Histograms to Describe Data Distributions", "sessions": ["Explore Dot Plots and Histograms", "Develop Displaying Data with a Histogram", "Develop Using Dot Plots and Histograms to Describe Data Distributions", "Refine Using Dot Plots and Histograms to Describe Data Distributions"]}, {"n": 31, "title": "Interpret Median and Interquartile Range in Box Plots", "sessions": ["Explore the Median of a Data Set", "Develop Finding the Median and Quartiles", "Develop Using Box Plots and IQR to Describe Variability", "Refine Interpreting Median and IQR in Box Plots"]}, {"n": 32, "title": "Interpret Mean and Mean Absolute Deviation", "sessions": ["Explore the Mean of a Data Set", "Develop Finding the Mean", "Develop Finding and Interpreting Mean Absolute Deviation", "Refine Interpreting Mean and Mean Absolute Deviation"]}, {"n": 33, "title": "Use Measures of Center and Variability to Summarize Data", "sessions": ["Explore Choosing a Measure of Center", "Develop Choosing Measures of Center and Variability", "Refine Using Measures of Center and Variability to Summarize Data"]}]}]}, "7": {"name": "7th Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-7", "units": [{"u": 1, "title": "Proportional Relationships: Ratios, Rates, and Circles", "lessons": [{"n": 1, "title": "Solve Problems Involving Scale", "sessions": ["Explore Scale Drawings", "Develop Using Scale to Find Distances", "Develop Using Scale to Find Areas", "Develop Redrawing a Scale Drawing", "Refine Solving Problems Involving Scale"]}, {"n": 2, "title": "Find Unit Rates Involving Ratios of Fractions", "sessions": ["Explore Unit Rates for Ratios with Fractions", "Develop Solving Problems with Unit Rates for Ratios with Two Fractions", "Refine Finding Unit Rates Involving Ratios of Fractions"]}, {"n": 3, "title": "Understand Proportional Relationships", "sessions": ["Explore Proportional Relationships", "Develop Understanding of Proportional Relationships", "Refine Ideas About Proportional Relationships"]}, {"n": 4, "title": "Represent Proportional Relationships", "sessions": ["Explore Graphing Proportional Relationships", "Develop Interpreting Graphs of Proportional Relationships", "Develop Recognizing Graphs of Proportional Relationships", "Refine Representing Proportional Relationships"]}, {"n": 5, "title": "Solve Proportional Relationship Problems", "sessions": ["Explore Proportional Relationship Problems", "Develop Solving Multi-Step Ratio Problems", "Refine Solving Proportional Relationship Problems"]}, {"n": 6, "title": "Solve Area and Circumference Problems Involving Circles", "sessions": ["Explore Circumference of a Circle", "Develop Using the Relationship Between a Circle's Circumference and Diameter", "Develop Finding the Area of a Circle", "Refine Solving Circumference and Area Problems Involving Circles"]}]}, {"u": 2, "title": "Numbers and Operations: Add and Subtract Rational Numbers", "lessons": [{"n": 7, "title": "Understand Addition with Negative Integers", "sessions": ["Explore Addition with Negative Integers", "Develop Understanding of Addition with Negative Integers", "Refine Ideas About Addition with Negative Integers"]}, {"n": 8, "title": "Add with Negative Numbers", "sessions": ["Explore Adding with Negative Numbers", "Develop Adding Positive and Negative Integers", "Develop Adding Positive and Negative Fractions and Decimals", "Refine Adding with Negative Numbers"]}, {"n": 9, "title": "Understand Subtraction with Negative Integers", "sessions": ["Explore Subtraction with Negative Integers", "Develop Understanding of Subtraction with Negative Integers", "Refine Ideas About Subtraction with Negative Integers"]}, {"n": 10, "title": "Add and Subtract Positive and Negative Numbers", "sessions": ["Explore Subtracting Positive and Negative Numbers", "Develop Subtracting Positive and Negative Fractions and Decimals", "Develop Adding and Subtracting Positive and Negative Fractions and Decimals", "Refine Adding and Subtracting Positive and Negative Numbers"]}]}, {"u": 3, "title": "Numbers and Operations: Multiply and Divide Rational Numbers", "lessons": [{"n": 11, "title": "Understand Multiplication with Negative Integers", "sessions": ["Explore Multiplication with Negative Integers", "Develop Understanding of Multiplication with Negative Integers", "Refine Ideas About Multiplication with Negative Integers"]}, {"n": 12, "title": "Multiply and Divide with Negative Numbers", "sessions": ["Explore Multiplying and Dividing with Negative Numbers", "Develop Multiplying Negative Rational Numbers", "Develop Dividing Negative Rational Numbers", "Refine Multiplying and Dividing with Negative Numbers"]}, {"n": 13, "title": "Express Rational Numbers as Terminating or Repeating Decimals", "sessions": ["Explore Terminating or Repeating Decimals", "Develop Writing Rational Numbers as Terminating Decimals", "Develop Writing Rational Numbers as Repeating Decimals", "Refine Expressing Rational Numbers as Terminating or Repeating Decimals"]}, {"n": 14, "title": "Use the Four Operations with Negative Numbers", "sessions": ["Explore Using the Four Operations with Negative Numbers", "Develop Solving Problems Using the Four Operations with Negative Numbers", "Refine Using the Four Operations with Negative Numbers"]}]}, {"u": 4, "title": "Algebraic Thinking: Expressions, Equations, and Inequalities", "lessons": [{"n": 15, "title": "Write Equivalent Expressions Involving Rational Numbers", "sessions": ["Explore Equivalent Expressions", "Develop Expanding Expressions", "Develop Factoring Expressions", "Refine Writing Equivalent Expressions Involving Rational Numbers"]}, {"n": 16, "title": "Understand Reasons for Rewriting Expressions", "sessions": ["Explore Representing a Situation with Different Expressions", "Develop Understanding of Representing a Situation with Different Expressions", "Refine Ideas About Reasons for Rewriting Expressions"]}, {"n": 17, "title": "Understand Multi-Step Equations", "sessions": ["Explore Reasoning About Multi-Step Equations", "Develop Understanding of Reasoning About Multi-Step Equations", "Refine Ideas About Multi-Step Equations"]}, {"n": 18, "title": "Write and Solve Multi-Step Equations", "sessions": ["Explore Solving Multi-Step Equations", "Develop Writing and Solving Equations with Two or More Addends", "Develop Writing and Solving Equations with Grouping Symbols", "Refine Writing and Solving Multi-Step Equations"]}, {"n": 19, "title": "Write and Solve Inequalities", "sessions": ["Explore Solving Inequalities", "Develop Solving One-Step Inequalities", "Develop Solving Multi-Step Inequalities", "Develop Writing and Solving Inequalities", "Refine Writing and Solving Inequalities"]}]}, {"u": 5, "title": "Proportional Reasoning: Percents and Statistical Samples", "lessons": [{"n": 20, "title": "Solve Problems Involving Percents", "sessions": ["Explore Percents", "Develop Finding Simple Interest", "Develop Solving Problems Involving a Single Percent", "Develop Solving Problems Involving Multiple Percents", "Refine Solving Problems Involving Percents"]}, {"n": 21, "title": "Solve Problems Involving Percent Change and Percent Error", "sessions": ["Explore Percent Change", "Develop Solving Problems Involving Percent Change", "Develop Solving Problems Involving Percent Error", "Refine Solving Problems Involving Percent Change and Percent Error"]}, {"n": 22, "title": "Understand Random Sampling", "sessions": ["Explore Sampling", "Develop Understanding of Random Sampling", "Refine Ideas About Random Sampling"]}, {"n": 23, "title": "Reason About Random Samples", "sessions": ["Explore Random Samples", "Develop Making Inferences from Samples About Populations", "Develop Making Inferences from Multiple Samples", "Refine Reasoning About Random Samples"]}, {"n": 24, "title": "Compare Populations", "sessions": ["Explore Comparing Two Populations", "Develop Comparing Centers of Data Relative to Variability", "Develop Comparing Two Populations", "Refine Comparing Populations"]}]}, {"u": 6, "title": "Geometry: Solids, Triangles, and Angles", "lessons": [{"n": 25, "title": "Solve Problems Involving Area and Surface Area", "sessions": ["Explore Finding Composite Areas", "Develop Solving Problems Involving Area", "Develop Solving Problems Involving Surface Area", "Develop Solving Problems Involving Surface Area of Composite Figures", "Refine Solving Problems Involving Area and Surface Area"]}, {"n": 26, "title": "Solve Problems Involving Volume", "sessions": ["Explore Finding Volumes of Right Prisms", "Develop Solving Problems Involving Volume of Right Prisms", "Develop Solving Problems Involving Volume of Composite Figures", "Refine Solving Problems Involving Volume"]}, {"n": 27, "title": "Describe Plane Sections of Three-Dimensional Figures", "sessions": ["Explore Plane Sections of Three-Dimensional Figures", "Develop Describing Plane Sections of Three-Dimensional Figures", "Refine Describing Plane Sections of Three-Dimensional Figures"]}, {"n": 28, "title": "Find Unknown Angle Measures", "sessions": ["Explore Finding Unknown Angle Measures", "Develop Using Supplementary and Vertical Angles", "Develop Using Complementary and Adjacent Angles", "Refine Finding Unknown Angle Measures"]}, {"n": 29, "title": "Draw Plane Figures with Given Conditions", "sessions": ["Explore Drawing Triangles", "Develop Drawing Triangles from Side Lengths", "Develop Conditions for Drawing Triangles", "Develop Drawing Quadrilaterals", "Refine Drawing Plane Figures with Given Conditions"]}]}, {"u": 7, "title": "Probability: Theoretical Probability, Experimental Probability, and Compound Events", "lessons": [{"n": 30, "title": "Understand Probability", "sessions": ["Explore Probability", "Develop Understanding of Probability", "Refine Ideas About Probability"]}, {"n": 31, "title": "Solve Problems Involving Experimental Probability", "sessions": ["Explore Experimental Probability", "Develop Finding Experimental Probability", "Develop Using Experimental Probability to Make Predictions", "Refine Solving Problems Involving Experimental Probability"]}, {"n": 32, "title": "Solve Problems Involving Probability Models", "sessions": ["Explore Theoretical Probability", "Develop Finding Theoretical Probabilities", "Develop Comparing Theoretical and Experimental Probabilities", "Refine Solving Problems Involving Probability Models"]}, {"n": 33, "title": "Solve Problems Involving Compound Events", "sessions": ["Explore Compound Events", "Develop Finding Probabilities of Compound Events with Two Events", "Develop Finding Probabilities of Compound Events with More than Two Events", "Develop Using Simulations to Find Probabilities of Compound Events", "Refine Solving Problems Involving Compound Events"]}]}]}, "8": {"name": "8th Grade", "ixl": "https://www.ixl.com/math/skill-plans/i-ready-classroom-mathematics-2024-grade-8", "units": [{"u": 1, "title": "Geometric Figures: Rigid Transformations and Congruence", "lessons": [{"n": 1, "title": "Understand Rigid Transformations and Their Properties", "sessions": ["Explore Rigid Transformations", "Develop Understanding of Rigid Transformations and Their Properties", "Refine Ideas About Rigid Transformations and Their Properties"]}, {"n": 2, "title": "Work with Single Rigid Transformations in the Coordinate Plane", "sessions": ["Explore Translations in the Coordinate Plane", "Develop Performing a Reflection in the Coordinate Plane", "Develop Performing a Rotation in the Coordinate Plane", "Develop Describing Single Rigid Transformations in the Coordinate Plane", "Refine Working with Single Rigid Transformations in the Coordinate Plane"]}, {"n": 3, "title": "Work with Sequences of Transformations and Congruence", "sessions": ["Explore Sequences of Rigid Transformations and Congruence", "Develop Performing Sequences of Rigid Transformations", "Develop Describing Sequences of Rigid Transformations", "Refine Working with Sequences of Transformations and Congruence"]}]}, {"u": 2, "title": "Geometric Figures: Transformations, Similarity, and Angle Relationships", "lessons": [{"n": 4, "title": "Understand Dilations and Similarity", "sessions": ["Explore Dilations and Similarity", "Develop Understanding of Dilations and Similarity", "Refine Ideas About Dilations and Similarity"]}, {"n": 5, "title": "Perform and Describe Transformations Involving Dilations", "sessions": ["Explore Dilations in the Coordinate Plane", "Develop Performing Sequences of Transformations Involving Dilations", "Develop Describing Sequences of Transformations Involving Dilations", "Refine Performing and Describing Transformations Involving Dilations"]}, {"n": 6, "title": "Describe Angle Relationships", "sessions": ["Explore Angle Relationships", "Develop Describing Congruent Angle Relationships", "Develop Describing Supplementary Angle Relationships", "Refine Describing Angle Relationships"]}, {"n": 7, "title": "Describe Angle Relationships in Triangles", "sessions": ["Explore the Sum of the Angle Measures in a Triangle", "Develop Describing the Exterior Angles of a Triangle", "Develop Using Angles to Determine Similar Triangles", "Refine Describing Angle Relationships in Triangles"]}]}, {"u": 3, "title": "Linear Relationships: Slope, Linear Equations, and Systems", "lessons": [{"n": 8, "title": "Graph Proportional Relationships and Define Slope", "sessions": ["Explore Proportional Relationships and Slope", "Develop Showing That the Slope of a Line Is Constant", "Develop Finding the Slope of a Line", "Refine Graphing Proportional Relationships and Defining Slope"]}, {"n": 9, "title": "Derive and Graph Linear Equations of the Form y = mx + b", "sessions": ["Explore Deriving y = mx", "Develop Deriving y = mx + b", "Develop Graphing a Linear Equation of the Form y = mx + b", "Develop Graphing a Linear Equation Given in Any Form", "Refine Deriving and Graphing Linear Equations of the Form y = mx + b"]}, {"n": 10, "title": "Solve Linear Equations in One Variable", "sessions": ["Explore Linear Equations in One Variable", "Develop Solving Linear Equations in One Variable with the Variable on Both Sides", "Develop Representing and Solving Problems with One-Variable Equations", "Refine Solving Linear Equations in One Variable"]}, {"n": 11, "title": "Determine the Number of Solutions to One-Variable Equations", "sessions": ["Explore the Number of Solutions to One-Variable Linear Equations", "Develop Determining the Number of Solutions to One-Variable Equations", "Develop Writing an Equation with No, One, or Infinitely Many Solutions", "Refine Determining the Number of Solutions to One-Variable Equations"]}, {"n": 12, "title": "Understand Systems of Linear Equations in Two Variables", "sessions": ["Explore Systems of Linear Equations in Two Variables", "Develop Understanding of the Number of Solutions to a System of Linear Equations", "Refine Ideas About Systems of Linear Equations in Two Variables"]}, {"n": 13, "title": "Solve Systems of Linear Equations Algebraically", "sessions": ["Explore Solving Systems of Linear Equations Algebraically", "Develop Solving Systems of Linear Equations by Substitution", "Develop Solving Systems of Linear Equations by Elimination", "Develop Determining When a System Has Zero or Infinitely Many Solutions", "Refine Solving Systems of Linear Equations Algebraically"]}, {"n": 14, "title": "Represent and Solve Problems with Systems of Linear Equations", "sessions": ["Explore Representing and Solving Problems with Systems of Linear Equations", "Develop Solving Real-World Problems with Systems of Linear Equations", "Develop Solving Mathematical Problems Involving Systems of Linear Equations", "Refine Representing and Solving Problems with Systems of Linear Equations"]}]}, {"u": 4, "title": "Functions: Linear and Nonlinear Relationships", "lessons": [{"n": 15, "title": "Understand Functions", "sessions": ["Explore Functions", "Develop Understanding of Linear and Nonlinear Functions", "Refine Ideas About Functions"]}, {"n": 16, "title": "Use Functions to Model Linear Relationships", "sessions": ["Explore Using Functions to Model Linear Relationships", "Develop Interpreting a Linear Function", "Develop Writing an Equation for a Linear Function from Two Points", "Develop Writing an Equation for a Linear Function from a Verbal Description", "Refine Using Functions to Model Linear Relationships"]}, {"n": 17, "title": "Compare Different Representations of Functions", "sessions": ["Explore Different Representations of Proportional Relationships", "Develop Comparing Increasing and Decreasing Linear Functions", "Develop Comparing Functions at Different Values", "Refine Comparing Different Representations of Functions"]}, {"n": 18, "title": "Analyze Functional Relationships Qualitatively", "sessions": ["Explore Analyzing Graphs of Functions", "Develop Using Graphs to Describe Functions Qualitatively", "Develop Sketching Graphs of Functions from Qualitative Descriptions", "Refine Analyzing Functional Relationships Qualitatively"]}]}, {"u": 5, "title": "Integer Exponents: Properties and Scientific Notation", "lessons": [{"n": 19, "title": "Apply Exponent Properties for Positive Integer Exponents", "sessions": ["Explore Exponent Properties for Positive Integer Exponents", "Develop Applying Properties for Powers with the Same Base", "Develop Applying Properties for Powers with the Same Exponent", "Refine Applying Exponent Properties for Positive Integer Exponents"]}, {"n": 20, "title": "Apply Exponent Properties for All Integer Exponents", "sessions": ["Explore Exponent Properties for Zero Exponents", "Develop Applying Properties of Negative Exponents", "Develop Applying Properties of Integer Exponents", "Refine Applying Exponent Properties for All Integer Exponents"]}, {"n": 21, "title": "Express Numbers Using Integer Powers of 10", "sessions": ["Explore Using Integer Powers of 10", "Develop Estimating Quantities Using Integer Powers of 10", "Develop Comparing Quantities Involving Integer Powers of 10", "Refine Expressing Numbers Using Integer Powers of 10"]}, {"n": 22, "title": "Work with Scientific Notation", "sessions": ["Explore Scientific Notation", "Develop Writing Numbers in Scientific Notation", "Develop Adding and Subtracting with Scientific Notation", "Develop Multiplying and Dividing with Scientific Notation", "Refine Working with Scientific Notation"]}]}, {"u": 6, "title": "Real Numbers: Rational Numbers, Irrational Numbers, and the Pythagorean Theorem", "lessons": [{"n": 23, "title": "Find Square Roots and Cube Roots to Solve Problems", "sessions": ["Explore Square Roots", "Develop Finding a Square Root to Solve Problems", "Develop Finding a Cube Root to Solve Problems", "Refine Finding Square Roots and Cube Roots to Solve Problems"]}, {"n": 24, "title": "Express Rational Numbers as Fractions and Decimals", "sessions": ["Explore Writing Fractions as Decimals", "Develop Writing a Repeating Decimal as a Fraction", "Refine Expressing Rational Numbers as Fractions and Decimals"]}, {"n": 25, "title": "Find Rational Approximations of Irrational Numbers", "sessions": ["Explore Numbers That Are Not Rational", "Develop Finding Rational Approximations and Locating Them on the Number Line", "Develop Estimating the Value of Irrational Expressions", "Refine Finding Rational Approximations of Irrational Numbers"]}, {"n": 26, "title": "Understand the Pythagorean Theorem and Its Converse", "sessions": ["Explore the Pythagorean Theorem", "Develop Understanding of the Pythagorean Theorem", "Refine Ideas About the Pythagorean Theorem and Its Converse"]}, {"n": 27, "title": "Apply the Pythagorean Theorem", "sessions": ["Explore Applying the Pythagorean Theorem", "Develop Finding an Unknown Length in a Right Triangle", "Develop Finding an Unknown Length in a Three-Dimensional Figure", "Develop Finding Distance in the Coordinate Plane", "Refine Applying the Pythagorean Theorem"]}, {"n": 28, "title": "Solve Problems with Volumes of Cylinders, Cones, and Spheres", "sessions": ["Explore Volumes of Cylinders, Cones, and Spheres", "Develop Finding Volume", "Develop Finding an Unknown Dimension", "Refine Solving Problems with Volumes of Cylinders, Cones, and Spheres"]}]}, {"u": 7, "title": "Statistics: Two-Variable Data and Fitting a Linear Model", "lessons": [{"n": 29, "title": "Analyze Scatter Plots and Fit a Linear Model to Data", "sessions": ["Explore Scatter Plots", "Develop Using a Scatter Plot to Analyze Data", "Develop Assessing Linear Models for Good Fit", "Develop Fitting a Linear Model Informally", "Refine Analyzing Scatter Plots and Fitting a Linear Model to Data"]}, {"n": 30, "title": "Write and Analyze an Equation for Fitting a Linear Model to Data", "sessions": ["Explore Writing an Equation of a Linear Model", "Develop Writing and Interpreting an Equation of a Linear Model", "Develop Analyzing a Linear Model to Make Predictions", "Refine Writing and Analyzing an Equation for Fitting a Linear Model to Data"]}, {"n": 31, "title": "Understand Two-Way Tables", "sessions": ["Explore Two-Way Tables", "Develop Understanding of Two-Way Tables", "Refine Ideas About Two-Way Tables"]}, {"n": 32, "title": "Construct and Interpret Two-Way Tables", "sessions": ["Explore Whole-Table Relative Frequencies", "Develop Constructing Two-Way Tables with Relative Frequencies", "Develop Interpreting and Analyzing Two-Way Tables", "Refine Constructing and Interpreting Two-Way Tables"]}]}]}};
+
+const COLORS = ['#2d5be3','#1a8a5a','#c0392b','#854f0b','#6a3fcf','#0f6e8c','#a83280'];
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let S = { setup:false, grade:'6', year:'2025-26', theme:'light', firstDay:'2025-08-25', lastDay:'2026-05-22', schoolDays:180, classes:[] };
+let P = {}; // P[year][cid] = { s:{key:bool}, sc:{key:val} }
+let W = {}; // W[year][cid][weekKey] = {pct,done}
+
+function SAVE(){
+  try{
+    localStorage.setItem('dt_s',JSON.stringify(S));
+    localStorage.setItem('dt_p',JSON.stringify(P));
+    localStorage.setItem('dt_w',JSON.stringify(W));
+  }catch(e){}
+}
+function LOAD(){
+  try{
+    const s=localStorage.getItem('dt_s'); if(s) S={...S,...JSON.parse(s)};
+    const p=localStorage.getItem('dt_p'); if(p) P=JSON.parse(p);
+    const w=localStorage.getItem('dt_w'); if(w) W=JSON.parse(w);
+  }catch(e){}
+}
+
+// ── CURRICULUM HELPERS ────────────────────────────────────────────────────
+function classGrades(cls){
+  const g=cls.grade||S.grade;
+  if(cls.accel){
+    if(g==='6') return ['6','7'];
+    if(g==='7') return ['7','8'];
+  }
+  return [g];
+}
+
+function allUnits(cls){
+  return classGrades(cls).flatMap(g=>(CUR[g]?.units||[]).map(u=>({...u,gk:g})));
+}
+
+function getP(year,cid){
+  if(!P[year]) P[year]={};
+  if(!P[year][cid]) P[year][cid]={s:{},sc:{}};
+  if(!P[year][cid].s) P[year][cid].s={};
+  if(!P[year][cid].sc) P[year][cid].sc={};
+  return P[year][cid];
+}
+
+function sk(gk,u,n,si){ return `${gk}_${u}_${n}_s${si}`; }
+function cck(gk,u,n){ return `${gk}_${u}_${n}_cc`; }
+function utk(gk,u){ return `${gk}_${u}_ut`; }
+
+function countAll(cls,year){
+  const prog=getP(year,cls.id);
+  let done=0,total=0;
+  allUnits(cls).forEach(u=>{
+    u.lessons.forEach(l=>{
+      l.sessions.forEach((_,si)=>{ total++; if(prog.s[sk(u.gk,u.u,l.n,si)]) done++; });
+      total++; if(prog.s[cck(u.gk,u.u,l.n)]) done++;
+    });
+    total++; if(prog.s[utk(u.gk,u.u)]) done++;
+  });
+  return {done,total};
+}
+
+function classPct(cls,year){
+  const {done,total}=countAll(cls,year);
+  return total>0?Math.round(done/total*100):0;
+}
+
+function findNext(cls,year){
+  const prog=getP(year,cls.id);
+  for(const u of allUnits(cls)){
+    for(const l of u.lessons){
+      for(let si=0;si<l.sessions.length;si++){
+        if(!prog.s[sk(u.gk,u.u,l.n,si)]) return {label:`Lesson ${l.n} · Session ${si+1}: ${l.sessions[si]}`,type:'s'};
+      }
+      if(!prog.s[cck(u.gk,u.u,l.n)]) return {label:`Lesson ${l.n} Comprehension Check`,type:'cc'};
+    }
+    if(!prog.s[utk(u.gk,u.u)]) return {label:`Unit ${u.u} Assessment`,type:'ut'};
+  }
+  return null;
+}
+
+function avgScores(cls,year){
+  const prog=getP(year,cls.id);
+  const ccs=[],uts=[];
+  allUnits(cls).forEach(u=>{
+    u.lessons.forEach(l=>{ const v=prog.sc[cck(u.gk,u.u,l.n)]; if(v!==undefined&&v!==null&&v!=='') ccs.push(+v); });
+    const v=prog.sc[utk(u.gk,u.u)]; if(v!==undefined&&v!==null&&v!=='') uts.push(+v);
+  });
+  const avg=a=>a.length>0?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null;
+  return {cc:avg(ccs),ut:avg(uts),ccN:ccs.length,utN:uts.length};
+}
+
+// ── WIZARD ────────────────────────────────────────────────────────────────
+let wStep=1;
+
+function updDots(){
+  document.getElementById('wdots').innerHTML=Array.from({length:3},(_,i)=>
+    `<div class="wdot ${i+1<wStep?'done':i+1===wStep?'on':''}"></div>`).join('');
+}
+
+function wGradeChange(){
+  const g=document.getElementById('wGrade').value;
+  const el=document.getElementById('gnote');
+  if(g==='6'||g==='7'){
+    el.style.display='block';
+    el.textContent=g==='6'
+      ?'You can mark a class as Accelerated to include all of 6th AND 7th grade content.'
+      :'You can mark a class as Accelerated to include all of 7th AND 8th grade content.';
+  } else el.style.display='none';
+}
+
+function buildCls(){
+  const n=+document.getElementById('wNum').value;
+  const g=document.getElementById('wGrade').value;
+  const showAccel=g==='6'||g==='7';
+  const names=['Period 1','Period 2','Period 3','Period 4','Period 5'];
+  document.getElementById('clsInputs').innerHTML=Array.from({length:n},(_,i)=>`
+    <div class="cls-row">
+      <div class="cdot" style="background:${COLORS[i%COLORS.length]}">${i+1}</div>
+      <input type="text" id="wc${i}" value="${names[i]}" placeholder="Class name">
+      ${showAccel?`<label class="accel-row"><input type="checkbox" id="wa${i}"> Accel</label>`:''}
+    </div>`).join('');
+  const an=document.getElementById('anote');
+  if(showAccel){an.style.display='block';an.textContent='Check "Accel" for any class covering extended grade content.';}
+  else an.style.display='none';
+}
+
+function wNav(d){
+  if(d===1&&wStep===3){
+    const g=document.getElementById('wGrade').value;
+    const n=+document.getElementById('wNum').value;
+    S.grade=g; S.year=document.getElementById('wYear').value;
+    S.firstDay=document.getElementById('wFirst').value;
+    S.lastDay=document.getElementById('wLast').value;
+    S.schoolDays=+document.getElementById('wDays').value||180;
+    S.classes=Array.from({length:n},(_,i)=>{
+      const nm=document.getElementById(`wc${i}`).value.trim()||`Class ${i+1}`;
+      const ae=document.getElementById(`wa${i}`);
+      return {id:`c${i}`,name:nm,color:COLORS[i%COLORS.length],grade:g,accel:ae?ae.checked:false};
+    });
+    S.setup=true; SAVE(); launch(); return;
+  }
+  wStep=Math.max(1,Math.min(3,wStep+d));
+  document.querySelectorAll('.wstep').forEach((el,i)=>el.classList.toggle('active',i+1===wStep));
+  document.getElementById('wBack').style.display=wStep>1?'block':'none';
+  document.getElementById('wNext').textContent=wStep===3?'Launch ✓':'Next →';
+  updDots();
+  if(wStep===2) buildCls();
+}
+updDots();
+
+// ── APP ────────────────────────────────────────────────────────────────────
+let activeC=null;
+
+function launch(){
+  document.getElementById('wiz').style.display='none';
+  document.getElementById('app').classList.add('on');
+  activeC=S.classes[0]?.id;
+  applyTheme(S.theme);
+  renderAll();
+  takeSnap();
+  startDbClock();
+  renderDashboard();
+  goPage('dashboard');
+}
+
+function applyTheme(t){ document.documentElement.setAttribute('data-theme',t); document.getElementById('themeBtn').textContent=t==='dark'?'☾':'☀'; }
+function toggleTheme(){ S.theme=S.theme==='dark'?'light':'dark'; applyTheme(S.theme); SAVE(); }
+
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.toggle('on',el.id==='page-'+p));
+  document.querySelectorAll('.navtab').forEach((el,i)=>el.classList.toggle('on',['dashboard','tracker','overview','settings'][i]===p));
+  if(p==='overview') renderOv();
+  if(p==='settings') renderSet();
+  if(p==='dashboard') renderDashboard();
+}
+
+function renderAll(){
+  renderYrSel();
+  renderCtabs();
+  renderBanner();
+  renderStats();
+  renderTracker();
+  updateIxlLink();
+}
+
+function renderYrSel(){
+  const sel=document.getElementById('yrsel');
+  const yrs=[];
+  for(let y=2023;y<=2032;y++) yrs.push(`${y}-${String(y+1).slice(-2)}`);
+  sel.innerHTML=yrs.map(y=>`<option value="${y}"${y===S.year?' selected':''}>${y}</option>`).join('');
+}
+
+function renderCtabs(){
+  document.getElementById('ctabs').innerHTML=S.classes.map(c=>
+    `<button class="ctab${c.id===activeC?' on':''}" onclick="switchC('${c.id}')">
+      <span class="cdotsmall" style="background:${c.color}"></span>${c.name}${c.accel?' ⚡':''}
+    </button>`).join('');
+}
+
+function switchC(id){ activeC=id; renderCtabs(); renderBanner(); renderStats(); renderTracker(); updateIxlLink(); }
+
+function gc(){ return S.classes.find(c=>c.id===activeC); }
+
+function updateIxlLink(){
+  const c=gc(); if(!c) return;
+  const g=c.grade||S.grade;
+  const url=CUR[g]?.ixl||'#';
+  const el=document.getElementById('ixlLink');
+  el.href=url; el.style.display=url==='#'?'none':'';
+}
+
+function renderBanner(){
+  const c=gc(); if(!c){document.getElementById('banner').innerHTML='';return;}
+  const next=findNext(c,S.year);
+  const {done,total}=countAll(c,S.year);
+  const el=document.getElementById('banner');
+  if(!next) el.innerHTML=`<span>🎉</span><span class="btext">All items complete for ${c.name}!</span>`;
+  else el.innerHTML=`<span>${next.type==='ut'?'📝':next.type==='cc'?'✅':'▶'}</span>
+    <span class="btext"><b>Up next:</b> ${next.label}</span>
+    <span class="bsub">${done}/${total} items done</span>`;
+}
+
+function renderStats(){
+  const c=gc(); if(!c){document.getElementById('stats').innerHTML='';return;}
+  const {done,total}=countAll(c,S.year);
+  const pct=total>0?Math.round(done/total*100):0;
+  const delta=wDelta(c.id);
+  const pace=paceInfo(c.id);
+  const dH=delta!==null?`<div class="sdelta ${delta>0?'up':'same'}">${delta>0?'▲ +'+delta+'%':'— '+delta+'%'} vs last week</div>`:'';
+  let pH=`<span style="font-size:12px;color:var(--text3)">Set school year dates in Settings</span>`;
+  if(pace){
+    const cc=pace.diff>=0?'g':pace.diff>=-5?'a':'r';
+    const fc=pace.isLate?'var(--red)':'var(--green)';
+    pH=`<span class="chip ${cc}">● ${pace.diff>=0?'+':''}${pace.diff}% vs pace</span>
+    <div class="pgrid">
+      <div>Expected: <b>${pace.expected}%</b></div><div>Actual: <b>${pct}%</b></div>
+      <div>Est. finish: <b style="color:${fc}">${pace.finStr}</b></div>
+      <div>Last day: <b>${pace.lastStr}</b></div>
+    </div>`;
+  }
+  document.getElementById('stats').innerHTML=`
+    <div class="scard">
+      <div class="sval">${done}<span style="font-size:13px;font-weight:400;color:var(--text3)">/${total}</span></div>
+      <div class="slbl">Items Taught</div>
+      <div class="pbg"><div class="pfill" style="width:${pct}%;background:${c.color}"></div></div>
+    </div>
+    <div class="scard">
+      <div class="sval">${pct}%</div>
+      <div class="slbl">Year Complete</div>${dH}
+    </div>
+    <div class="scard">
+      <div class="sval">${total-done}</div>
+      <div class="slbl">Items Remaining</div>
+      <div class="ssub">${c.accel?'Accelerated':CUR[c.grade||S.grade]?.name||''}</div>
+    </div>
+    <div class="scard" style="grid-column:span 2">
+      <div class="slbl" style="margin-bottom:.4rem">Pacing Status</div>${pH}
+    </div>`;
+}
+
+// ── TABLE ─────────────────────────────────────────────────────────────────
+function renderTracker(){
+  const c=gc(); if(!c){document.getElementById('tbl').innerHTML='';return;}
+  const prog=getP(S.year,c.id);
+  const units=allUnits(c);
+  const maxS=Math.max(...units.flatMap(u=>u.lessons.map(l=>l.sessions.length)));
+
+  // Build session type header labels (just numbered)
+  const sHdrs=Array.from({length:maxS},(_,i)=>`Session ${i+1}`);
+
+  let html=`<div class="twrap"><table>
+  <thead><tr>
+    <th>Lesson</th>
+    ${sHdrs.map(h=>`<th class="sc">${h}</th>`).join('')}
+    <th class="sc" style="background:color-mix(in srgb,var(--gbg) 60%,transparent);color:var(--green)">CC ✓</th>
+    <th class="score-h" style="background:color-mix(in srgb,var(--gbg) 40%,transparent);color:var(--green)">CC Score</th>
+    <th style="min-width:50px;text-align:center;font-size:11px">%</th>
+  </tr></thead><tbody>`;
+
+  units.forEach(u=>{
+    const gk=u.gk;
+    let udone=0,utotal=0;
+    u.lessons.forEach(l=>{
+      l.sessions.forEach((_,si)=>{ utotal++; if(prog.s[sk(gk,u.u,l.n,si)]) udone++; });
+      utotal++; if(prog.s[cck(gk,u.u,l.n)]) udone++;
+    });
+    utotal++; if(prog.s[utk(gk,u.u)]) udone++;
+    const upct=utotal>0?Math.round(udone/utotal*100):0;
+    const bCls=gk==='8'?'b8':gk==='7'?'b7':'b6';
+    const gname=CUR[gk]?.name||gk;
+
+    html+=`<tr class="uhdr"><td colspan="${maxS+4}" style="padding:0">
+      <div class="urow">
+        <div class="ubar" style="background:${u.color||'#888'}"></div>
+        <span class="utitle">Unit ${u.u} · ${u.title}</span>
+        <span class="ubadge ${bCls}">${gname}</span>
+        <span class="umeta">${udone}/${utotal} · ${upct}%</span>
+      </div>
+    </td></tr>`;
+
+    u.lessons.forEach(l=>{
+      let ldone=0,ltotal=l.sessions.length+1; // +1 for CC
+      l.sessions.forEach((_,si)=>{ if(prog.s[sk(gk,u.u,l.n,si)]) ldone++; });
+      if(prog.s[cck(gk,u.u,l.n)]) ldone++;
+      const lpct=Math.round(ldone/ltotal*100);
+
+      html+=`<tr class="lrow">
+        <td>
+          <div class="lnum">Lesson ${l.n}</div>
+          <div class="ltitle">${l.title}</div>
+          <div class="lpct">${ldone}/${ltotal} · ${lpct}%</div>
+        </td>`;
+
+      for(let si=0;si<maxS;si++){
+        if(si<l.sessions.length){
+          const k=sk(gk,u.u,l.n,si);
+          const chk=!!prog.s[k];
+          const tip=l.sessions[si];
+          html+=`<td class="scell" title="${tip.replace(/"/g,'&quot;')}">
+            <input type="checkbox" class="cb" ${chk?'checked':''} data-k="${k}" data-cid="${c.id}" onchange="toggleS(this)">
+          </td>`;
+        } else html+=`<td class="na">·</td>`;
+      }
+
+      const ck=cck(gk,u.u,l.n);
+      html+=`<td class="sccell">
+        <input type="checkbox" class="cb cc" ${prog.s[ck]?'checked':''} data-k="${ck}" data-cid="${c.id}" onchange="toggleS(this)">
+      </td>
+      <td class="scorecell">
+        <input type="number" class="score-inp" value="${prog.sc[ck]??''}" min="0" max="100" placeholder="%" data-sk="${ck}" data-cid="${c.id}" onchange="saveScore(this)">
+      </td>
+      <td style="text-align:center;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text3)">${lpct}%</td>
+      </tr>`;
+    });
+
+    // Unit test row
+    const uk=utk(gk,u.u);
+    const utDone=prog.s[uk];
+    html+=`<tr class="lrow utrow">
+      <td>
+        <div class="lnum" style="color:var(--purple)">📝 Unit ${u.u} Assessment</div>
+        <div class="ltitle" style="font-weight:600">Unit ${u.u} Test — ${u.title}</div>
+      </td>`;
+    for(let si=0;si<maxS;si++) html+=`<td class="na">·</td>`;
+    html+=`<td class="sccell">
+      <input type="checkbox" class="cb ut" ${utDone?'checked':''} data-k="${uk}" data-cid="${c.id}" onchange="toggleS(this)">
+    </td>
+    <td class="scorecell">
+      <input type="number" class="score-inp" value="${prog.sc[uk]??''}" min="0" max="100" placeholder="%" data-sk="${uk}" data-cid="${c.id}" onchange="saveScore(this)">
+    </td>
+    <td style="text-align:center;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--purple)">${utDone?'✓':''}</td>
+    </tr>`;
+  });
+
+  html+='</tbody></table></div>';
+  document.getElementById('tbl').innerHTML=html;
+}
+
+function toggleS(el){
+  const k=el.dataset.k,cid=el.dataset.cid,year=S.year;
+  getP(year,cid).s[k]=el.checked;
+  SAVE();
+  if(el.checked) celebrate();
+  if(cid===activeC){ renderStats(); renderBanner(); }
+  // Update row % inline
+  const row=el.closest('tr');
+  if(row){
+    const pctCell=row.querySelector('td:last-child');
+    const cbs=row.querySelectorAll('input.cb');
+    if(pctCell&&cbs.length){
+      let d=0,t=0;
+      cbs.forEach(cb=>{t++;if(cb.checked)d++;});
+      if(t>0) pctCell.textContent=Math.round(d/t*100)+'%';
+    }
+  }
+}
+
+function saveScore(el){
+  const k=el.dataset.sk,cid=el.dataset.cid;
+  const v=el.value===''?null:+el.value;
+  getP(S.year,cid).sc[k]=v;
+  SAVE();
+}
+
+// ── PACING ────────────────────────────────────────────────────────────────
+function paceInfo(cid){
+  const c=S.classes.find(x=>x.id===cid);
+  if(!c||!S.firstDay||!S.lastDay) return null;
+  const first=new Date(S.firstDay),last=new Date(S.lastDay),today=new Date();
+  if(today<first||today>last) return null;
+  const elapsed=wdBetween(first,today);
+  const pctEl=elapsed/S.schoolDays;
+  const pct=classPct(c,S.year);
+  const expected=Math.round(pctEl*100);
+  const diff=pct-expected;
+  const {done,total}=countAll(c,S.year);
+  const rem=total-done;
+  let finStr='—';
+  if(done>0&&elapsed>0){
+    const rate=done/elapsed;
+    const proj=rem/rate;
+    const fin=addWd(today,proj,last);
+    finStr=fmt(fin);
+    const finDate=new Date(fin);
+    return {expected,diff,finStr,lastStr:fmt(last),isLate:finDate>last};
+  }
+  return {expected,diff,finStr,lastStr:fmt(last),isLate:false};
+}
+function wdBetween(a,b){let c=0,d=new Date(a);while(d<=b){if(d.getDay()!==0&&d.getDay()!==6)c++;d.setDate(d.getDate()+1);}return c;}
+function addWd(s,n,cap){let d=new Date(s),c=0;while(c<n){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)c++;if(d>cap)break;}return d;}
+function fmt(d){return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+
+// ── WEEKLY SNAPSHOT ───────────────────────────────────────────────────────
+function wk(d){ const dt=d||new Date(),y=dt.getFullYear(),w=getWN(dt); return `${y}-W${String(w).padStart(2,'0')}`; }
+function getWN(d){const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=dt.getUTCDay()||7;dt.setUTCDate(dt.getUTCDate()+4-dn);const ys=new Date(Date.UTC(dt.getUTCFullYear(),0,1));return Math.ceil((((dt-ys)/86400000)+1)/7);}
+function takeSnap(){
+  const key=wk();
+  if(!W[S.year]) W[S.year]={};
+  S.classes.forEach(c=>{
+    if(!W[S.year][c.id]) W[S.year][c.id]={};
+    if(!W[S.year][c.id][key]) W[S.year][c.id][key]={pct:classPct(c,S.year),done:countAll(c,S.year).done};
+  });
+  SAVE();
+}
+function wDelta(cid){
+  const key=wk(),d=new Date();d.setDate(d.getDate()-7);const lk=wk(d);
+  const snap=W[S.year]?.[cid];
+  if(!snap) return null;
+  const cur=classPct(S.classes.find(x=>x.id===cid),S.year);
+  const last=snap[lk]?.pct??snap[Object.keys(snap).sort()[0]]?.pct;
+  return last!==undefined?cur-last:null;
+}
+
+// ── CELEBRATION ───────────────────────────────────────────────────────────
+const MSGS=['Great job! 🎉','Woo hoo! 🙌','Awesome! ⭐','Keep it up! 💪','Fantastic! 🌟','Yes! 🎯','You rock! 🤘','Nailed it! 🏆','Boom! 💥','Amazing! ✨'];
+let lastM=-1;
+function celebrate(){
+  let i; do{i=Math.floor(Math.random()*MSGS.length);}while(i===lastM);
+  lastM=i;
+  const el=document.getElementById('celeb');
+  el.textContent=MSGS[i]; el.classList.add('on');
+  setTimeout(()=>el.classList.remove('on'),1800);
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────
+function spill(v){
+  if(v===null||v===undefined||v==='') return `<span class="spill sp-na">—</span>`;
+  const n=+v,c=n>=80?'sp-hi':n>=60?'sp-mid':'sp-lo';
+  return `<span class="spill ${c}">${n}%</span>`;
+}
+
+function renderOv(){
+  const cards=S.classes.map(c=>{
+    const {done,total}=countAll(c,S.year);
+    const pct=total>0?Math.round(done/total*100):0;
+    const delta=wDelta(c.id);
+    const {cc,ut,ccN,utN}=avgScores(c,S.year);
+    const prog=getP(S.year,c.id);
+    const ubars=allUnits(c).map(u=>{
+      const gk=u.gk;
+      let ud=0,ut2=0;
+      u.lessons.forEach(l=>{l.sessions.forEach((_,si)=>{ut2++;if(prog.s[sk(gk,u.u,l.n,si)])ud++;});ut2++;if(prog.s[cck(gk,u.u,l.n)])ud++;});
+      ut2++;if(prog.s[utk(gk,u.u)])ud++;
+      const up=ut2>0?Math.round(ud/ut2*100):0;
+      return `<div class="ovurow">
+        <div class="ovuname" title="Unit ${u.u}: ${u.title}">U${u.u} ${u.title.length>25?u.title.slice(0,24)+'…':u.title}</div>
+        <div class="ovubg"><div class="ovufill" style="width:${up}%;background:${u.color||'var(--accent)'}"></div></div>
+        <div class="ovupct">${up}%</div>
+      </div>`;
+    }).join('');
+    const dH=delta!==null?`<div class="ovdelta ${delta>0?'up':'same'}">${delta>0?'▲ +'+delta+'%':'— '+delta+'%'} this week</div>`:'';
+    return `<div class="ovcard">
+      <div class="ovchead"><div class="ovdot" style="background:${c.color}"></div><div class="ovname">${c.name}${c.accel?' ⚡':''}</div></div>
+      <div class="ovpct">${pct}%</div>
+      <div class="ovsub">${done}/${total} items taught</div>${dH}
+      <div class="pbg" style="margin:.5rem 0"><div class="pfill" style="width:${pct}%;background:${c.color}"></div></div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin:.4rem 0">
+        <div style="font-size:11px;color:var(--text2)">Avg CC: ${spill(cc)} <span style="color:var(--text3)">(${ccN})</span></div>
+        <div style="font-size:11px;color:var(--text2)">Avg Test: ${spill(ut)} <span style="color:var(--text3)">(${utN})</span></div>
+      </div>
+      <div class="ovubars">${ubars}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('ovcards').innerHTML=cards;
+
+  // Score table — show all lessons
+  const refCls=S.classes[0];
+  const ccCols=S.classes.map(c=>`<th style="text-align:center">${c.name}</th>`).join('');
+  let scoreRows='';
+  if(refCls){
+    allUnits(refCls).forEach(u=>{
+      const gk=u.gk;
+      // Unit header
+      scoreRows+=`<tr style="background:var(--s2)"><td colspan="${S.classes.length+3}" style="font-size:11px;font-weight:600;padding:.35rem .6rem;color:var(--text2)">Unit ${u.u}: ${u.title}</td></tr>`;
+      u.lessons.forEach(l=>{
+        const ccs=S.classes.map(c=>{const v=getP(S.year,c.id).sc[cck(gk,u.u,l.n)];return `<td style="text-align:center">${spill(v!==undefined&&v!==null&&v!==''?+v:null)}</td>`;}).join('');
+        scoreRows+=`<tr><td style="color:var(--text3);font-size:10px;font-family:'JetBrains Mono',monospace">L${l.n}</td><td>${l.title}</td><td style="text-align:center;font-size:11px;color:var(--text3)">CC</td>${ccs}</tr>`;
+      });
+      const utCols=S.classes.map(c=>{const v=getP(S.year,c.id).sc[utk(gk,u.u)];return `<td style="text-align:center">${spill(v!==undefined&&v!==null&&v!==''?+v:null)}</td>`;}).join('');
+      scoreRows+=`<tr style="background:color-mix(in srgb,var(--pbg) 40%,transparent)"><td style="color:var(--purple);font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace">U${u.u}</td><td style="font-weight:600">Unit ${u.u} Assessment</td><td style="text-align:center;font-size:11px;color:var(--purple)">TEST</td>${utCols}</tr>`;
+    });
+  }
+  document.getElementById('scoresum').innerHTML=`<h3>📊 Score Comparison</h3>
+    <table class="stbl"><thead><tr><th>#</th><th>Lesson / Assessment</th><th>Type</th>${ccCols}</tr></thead>
+    <tbody>${scoreRows}</tbody></table>`;
+
+  // Summary comparison
+  const rows=S.classes.map(c=>{
+    const {done,total}=countAll(c,S.year);
+    const pct=total>0?Math.round(done/total*100):0;
+    const delta=wDelta(c.id);
+    const pace=paceInfo(c.id);
+    const {cc,ut}=avgScores(c,S.year);
+    const pChip=pace?`<span class="chip ${pace.diff>=0?'g':pace.diff>=-5?'a':'r'}">${pace.diff>=0?'+':''}${pace.diff}%</span>`:'<span style="color:var(--text3)">—</span>';
+    return `<tr>
+      <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${c.color};margin-right:5px;vertical-align:middle"></span>${c.name}${c.accel?' ⚡':''}</td>
+      <td style="text-align:center;font-weight:700">${pct}%</td>
+      <td style="text-align:center">${done}/${total}</td>
+      <td style="text-align:center">${delta!==null?(delta>0?'▲ +'+delta+'%':'— '+delta+'%'):'—'}</td>
+      <td style="text-align:center">${pChip}</td>
+      <td style="text-align:center">${spill(cc)}</td>
+      <td style="text-align:center">${spill(ut)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('ctbl').innerHTML=`<table>
+    <thead><tr><th>Class</th><th style="text-align:center">Progress</th><th style="text-align:center">Items</th><th style="text-align:center">This week</th><th style="text-align:center">vs Pace</th><th style="text-align:center">Avg CC</th><th style="text-align:center">Avg Test</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+function renderSet(){
+  document.getElementById('sFirst').value=S.firstDay||'';
+  document.getElementById('sLast').value=S.lastDay||'';
+  document.getElementById('sDays').value=S.schoolDays||180;
+  document.getElementById('clsSet').innerHTML=S.classes.map(c=>`
+    <div class="cls-set">
+      <div style="width:20px;height:20px;border-radius:50%;background:${c.color};flex-shrink:0"></div>
+      <input class="setinp" style="width:190px" type="text" value="${c.name}" oninput="renameC('${c.id}',this.value)">
+      <span style="font-size:12px;color:var(--text3)">${classGrades(c).map(g=>CUR[g]?.name||g).join(' + ')}</span>
+      <label style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:.3rem">
+        <input type="checkbox" ${c.accel?'checked':''} onchange="setAccel('${c.id}',this.checked)" style="accent-color:var(--accent)"> Accelerated
+      </label>
+    </div>`).join('');
+  document.getElementById('resetBtns').innerHTML=S.classes.map(c=>
+    `<button class="btn btn-d btn-sm" onclick="resetC('${c.id}')">Reset ${c.name}</button>`).join('')+
+    `<button class="btn btn-s btn-sm" onclick="restartWiz()">Restart Setup</button>`;
+}
+function SS(k,v){S[k]=v;SAVE();renderStats();}
+function renameC(id,v){const c=S.classes.find(x=>x.id===id);if(c){c.name=v;SAVE();renderCtabs();}}
+function setAccel(id,v){const c=S.classes.find(x=>x.id===id);if(c){c.accel=v;SAVE();renderAll();}}
+function resetC(id){
+  const c=S.classes.find(x=>x.id===id);
+  if(!confirm(`Reset all progress for ${c.name} in ${S.year}?`)) return;
+  if(P[S.year]) P[S.year][id]={s:{},sc:{}};
+  SAVE();renderStats();renderTracker();toast(`${c.name} reset for ${S.year}`);
+}
+function restartWiz(){if(!confirm('Restart setup? Progress data is preserved.')) return;S.setup=false;SAVE();location.reload();}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────────────
+function exportJSON(){
+  const data={v:4,S,P,W,at:new Date().toISOString()};
+  dl(JSON.stringify(data,null,2),`dudas-iready-${S.year}-${ts()}.json`,'application/json');
+  toast('JSON backup downloaded!');
+}
+
+function exportCSV(){
+  const rows=[['Class','Accel','Grade','Year','Unit','Lesson','Session','Type','Taught','Score']];
+  S.classes.forEach(c=>{
+    const prog=getP(S.year,c.id);
+    allUnits(c).forEach(u=>{
+      const gk=u.gk;
+      u.lessons.forEach(l=>{
+        l.sessions.forEach((sess,si)=>{
+          const k=sk(gk,u.u,l.n,si);
+          const type=sess.startsWith('Explore')?'Explore':sess.startsWith('Develop')?'Develop':'Refine';
+          rows.push([c.name,c.accel?'Yes':'No',CUR[gk]?.name||gk,S.year,`Unit ${u.u}: ${u.title}`,`L${l.n}: ${l.title}`,sess,type,prog.s[k]?'Yes':'No','']);
+        });
+        const ck2=cck(gk,u.u,l.n);
+        rows.push([c.name,c.accel?'Yes':'No',CUR[gk]?.name||gk,S.year,`Unit ${u.u}: ${u.title}`,`L${l.n}: ${l.title}`,'Comprehension Check','CC',prog.s[ck2]?'Yes':'No',prog.sc[ck2]??'']);
+      });
+      const uk2=utk(gk,u.u);
+      rows.push([c.name,c.accel?'Yes':'No',CUR[gk]?.name||gk,S.year,`Unit ${u.u}: ${u.title}`,'','Unit Assessment','UT',prog.s[uk2]?'Yes':'No',prog.sc[uk2]??'']);
+    });
+  });
+  const csvStr = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  dl(csvStr,`dudas-iready-${S.year}-${ts()}.csv`,'text/csv');
+  toast('CSV exported!');
+}
+
+function exportPDF(){
+  const w=window.open('','_blank');
+  const body=S.classes.map(c=>{
+    const {done,total}=countAll(c,S.year);
+    const pct=total>0?Math.round(done/total*100):0;
+    const {cc,ut}=avgScores(c,S.year);
+    const prog=getP(S.year,c.id);
+    const rows=allUnits(c).map(u=>{
+      const gk=u.gk;
+      let ud=0,ut2=0;
+      u.lessons.forEach(l=>{l.sessions.forEach((_,si)=>{ut2++;if(prog.s[sk(gk,u.u,l.n,si)])ud++;});ut2++;if(prog.s[cck(gk,u.u,l.n)])ud++;});
+      ut2++;if(prog.s[utk(gk,u.u)])ud++;
+      const up=ut2>0?Math.round(ud/ut2*100):0;
+      const usc=prog.sc[utk(gk,u.u)];
+      return `<tr><td>U${u.u}</td><td>${u.title}</td><td>${ud}/${ut2}</td><td>${up}%</td><td>${usc!=null&&usc!==''?usc+'%':'—'}</td></tr>`;
+    }).join('');
+    return `<h3>${c.name}${c.accel?' (Accel)':''}</h3>
+    <p>Overall: <b>${pct}%</b> (${done}/${total}) | Avg CC: ${cc!=null?cc+'%':'—'} | Avg Test: ${ut!=null?ut+'%':'—'}</p>
+    <table border="1" style="border-collapse:collapse;width:100%;font-size:11px;margin-bottom:12px">
+      <tr style="background:#eee"><th>Unit</th><th>Title</th><th>Done</th><th>%</th><th>Test Score</th></tr>
+      ${rows}
+    </table>`;
+  }).join('');
+  w.document.write(`<!DOCTYPE html><html><head><title>Duda's iReady Tracker — ${S.year}</title>
+  <style>body{font-family:sans-serif;padding:20px;font-size:13px}h1{font-size:18px}h3{margin:14px 0 6px}th,td{padding:3px 7px;text-align:left}p{margin:3px 0 6px}</style>
+  </head><body>
+  <h1>Duda's iReady Math Tracker — ${S.year}</h1>
+  <p style="color:#888;font-size:10px">⚠️ Not affiliated with i-Ready® / Curriculum Associates. Verify against Teacher Toolbox.</p>
+  <p>Generated: ${new Date().toLocaleDateString()}</p>${body}</body></html>`);
+  w.document.close(); w.focus(); w.print();
+  toast('PDF report opened — use Print to save!');
+}
+
+function importJSON(e){
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!d.S||!d.P) throw new Error('bad');
+      S={...S,...d.S}; P=d.P; W=d.W||{};
+      SAVE(); toast('Backup restored!'); setTimeout(()=>location.reload(),800);
+    }catch(err){toast('Invalid backup file');}
+  };
+  r.readAsText(file);
+}
+
+function dl(content,name,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=name; a.click();
+}
+function ts(){return new Date().toISOString().slice(0,10);}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────
+
+// Master activity list — every possible activity a teacher might do
+// Each entry: { id, emoji, label, color, defaultMin, canBeStation }
+const DB_ACTIVITIES = [
+  { id:'bellringer',  emoji:'🔔', label:'Bell Ringer / Warm-Up',               color:'#e67e22', defaultMin:5,  canBeStation:false },
+  { id:'tryit',       emoji:'🧠', label:'Try It (student grapple)',              color:'#2d5be3', defaultMin:8,  canBeStation:false },
+  { id:'discussit',   emoji:'💬', label:'Discuss It (partner + whole class)',    color:'#2d5be3', defaultMin:10, canBeStation:false },
+  { id:'connectit',   emoji:'🔗', label:'Connect It (workbook questions)',       color:'#2d5be3', defaultMin:10, canBeStation:false },
+  { id:'applyit',     emoji:'✏️', label:'Apply It (problems)',                   color:'#6a3fcf', defaultMin:10, canBeStation:false },
+  { id:'instruction', emoji:'📢', label:'Whole Class Instruction',               color:'#2d5be3', defaultMin:15, canBeStation:false },
+  { id:'stations',    emoji:'🔄', label:'Stations / Rotations',                 color:'#1a8a5a', defaultMin:45, canBeStation:true  },
+  { id:'teachertbl',  emoji:'👩‍🏫', label:'Teacher Table (small group)',           color:'#1a8a5a', defaultMin:15, canBeStation:true  },
+  { id:'ixl_iready',  emoji:'💻', label:'IXL — iReady Skill Alignment',         color:'#0f6e8c', defaultMin:15, canBeStation:true  },
+  { id:'ixl_iar',     emoji:'📊', label:'IXL — IAR Test Prep',                  color:'#0f6e8c', defaultMin:15, canBeStation:true  },
+  { id:'iready_dig',  emoji:'🖥️', label:'iReady — Teacher Assigned (Digital)',  color:'#854f0b', defaultMin:15, canBeStation:true  },
+  { id:'iready_les',  emoji:'📚', label:'iReady — Assigned Lesson',             color:'#854f0b', defaultMin:15, canBeStation:true  },
+  { id:'workbook',    emoji:'📓', label:'Workbook / Worksheet Practice',         color:'#6a3fcf', defaultMin:15, canBeStation:true  },
+  { id:'centers',     emoji:'🎯', label:'Math Center Activity',                 color:'#6a3fcf', defaultMin:15, canBeStation:true  },
+  { id:'indep',       emoji:'🔕', label:'Independent Practice',                  color:'#6a3fcf', defaultMin:15, canBeStation:false },
+  { id:'partner',     emoji:'🤝', label:'Partner Work',                          color:'#6c3483', defaultMin:10, canBeStation:true  },
+  { id:'reteach',     emoji:'↩️', label:"Reteach (Teacher's Guide activity)",  color:'#c0392b', defaultMin:15, canBeStation:true  },
+  { id:'extend',      emoji:'🚀', label:'Extend / Enrichment (Challenge)',       color:'#1a8a5a', defaultMin:15, canBeStation:true  },
+  { id:'exit',        emoji:'📝', label:'Exit Ticket / Comprehension Check',     color:'#c0392b', defaultMin:5,  canBeStation:false },
+  { id:'quiz',        emoji:'📋', label:'Lesson Quiz / Assessment',              color:'#6c3483', defaultMin:10, canBeStation:false },
+  { id:'transition',  emoji:'⏩', label:'Transition / Brain Break',              color:'#888',    defaultMin:3,  canBeStation:false },
+  { id:'custom',      emoji:'＋', label:'Custom',                               color:'#888',    defaultMin:10, canBeStation:true  },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+// Plan = array of { actId, min, isStation, stationLabel, stationGroup }
+let DB = {
+  plan: [],          // today's plan items
+  periodLen: 72,
+  activeClassIdx: 0,
+  runIdx: -1,
+  timeLeft: 0,
+  totalTime: 0,
+  running: false,
+  timer: null,
+  clockInterval: null
+};
+
+function dbSave(){ try{ localStorage.setItem('dt_db2', JSON.stringify({plan:DB.plan, periodLen:DB.periodLen, activeClassIdx:DB.activeClassIdx})); }catch(e){} }
+function dbLoad(){
+  try{
+    const r=localStorage.getItem('dt_db2');
+    if(r){ const d=JSON.parse(r); DB.plan=d.plan||[]; DB.periodLen=d.periodLen||72; DB.activeClassIdx=d.activeClassIdx||0; }
+  }catch(e){}
+}
+
+function dbScheduleSave(){ try{ const n=S.classes.length; const arr=Array.from({length:n},(_,i)=>({start:document.getElementById('ds-s-'+i)?.value||'',end:document.getElementById('ds-e-'+i)?.value||''})); localStorage.setItem('dt_dbsched',JSON.stringify(arr)); dbUpdateStatuses(); }catch(e){} }
+function dbScheduleLoad(){ try{ return JSON.parse(localStorage.getItem('dt_dbsched'))||[]; }catch(e){ return []; } }
+
+// ── Render checklist ───────────────────────────────────────────────────────
+function renderDbChecklist(){
+  const el=document.getElementById('db-checklist');
+  if(!el) return;
+  const checkedIds=new Set(DB.plan.map(p=>p.actId));
+  el.innerHTML=DB_ACTIVITIES.map(a=>{
+    const on=checkedIds.has(a.id);
+    return `<div class="ck-item${on?' checked':''}" onclick="dbToggleActivity('${a.id}')">
+      <div class="ck-check">${on?'✓':''}</div>
+      <span class="ck-emoji">${a.emoji}</span>
+      <span class="ck-label">${a.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function dbToggleActivity(id){
+  const act=DB_ACTIVITIES.find(a=>a.id===id);
+  if(!act) return;
+  const idx=DB.plan.findIndex(p=>p.actId===id);
+  if(idx>=0){
+    DB.plan.splice(idx,1);
+  } else {
+    DB.plan.push({ actId:id, min:act.defaultMin, isStation:false, stationLabel:'', stationGroup:'' });
+  }
+  dbSave();
+  renderDbChecklist();
+  renderDbPlan();
+  dbUpdatePlanTotal();
+}
+
+// ── Render plan ────────────────────────────────────────────────────────────
+function renderDbPlan(){
+  const el=document.getElementById('db-plan-list');
+  if(!el) return;
+  if(!DB.plan.length){
+    el.innerHTML='<div style="text-align:center;padding:1.2rem;font-size:13px;color:var(--text3)">Check activities on the left to build your plan.</div>';
+    return;
+  }
+  el.innerHTML=DB.plan.map((item,i)=>{
+    const act=DB_ACTIVITIES.find(a=>a.id===item.actId)||{label:item.actId,color:'#888',emoji:'•',canBeStation:false};
+    const staBtnCls='plan-sta-toggle'+(item.isStation?' active':'');
+    const staBtnTxt=item.isStation?'🔄 Station ✓':'🔄 Station?';
+    const staDetail=item.isStation?`<div class="sta-detail">
+      <input type="text" class="sta-inp" placeholder="Station name (e.g. Station 1)" value="${(item.stationLabel||'').replace(/"/g,'&quot;')}" oninput="dbUpdateItem(${i},'stationLabel',this.value)">
+      <input type="text" class="sta-inp" placeholder="Group (e.g. Group A)" value="${(item.stationGroup||'').replace(/"/g,'&quot;')}" oninput="dbUpdateItem(${i},'stationGroup',this.value)">
+    </div>`:'';
+    return `<div class="plan-item${item.isStation?' is-station':''}">
+      <div class="plan-color" style="background:${act.color}"></div>
+      <span style="font-size:14px">${act.emoji}</span>
+      <span class="plan-name">${item.customLabel||act.label}</span>
+      <input type="number" class="plan-min-inp" value="${item.min}" min="1" max="120" oninput="dbUpdateItem(${i},'min',+this.value)">
+      <span style="font-size:11px;color:var(--text3)">min</span>
+      ${act.canBeStation?`<button class="${staBtnCls}" onclick="dbToggleStation(${i})">${staBtnTxt}</button>`:''}
+      <span class="plan-del" onclick="dbRemoveItem(${i})">✕</span>
+      ${staDetail}
+    </div>`;
+  }).join('');
+  dbUpdatePlanTotal();
+}
+
+function dbUpdateItem(i,field,val){
+  if(DB.plan[i]) DB.plan[i][field]=val;
+  dbSave();
+  if(field==='min'||field==='isStation') { renderDbPlan(); dbUpdatePlanTotal(); } 
+}
+
+function dbToggleStation(i){
+  if(DB.plan[i]){ DB.plan[i].isStation=!DB.plan[i].isStation; dbSave(); renderDbPlan(); }
+}
+
+function dbRemoveItem(i){
+  DB.plan.splice(i,1);
+  dbSave();
+  renderDbChecklist();
+  renderDbPlan();
+  dbUpdatePlanTotal();
+}
+
+function dbClearAll(){
+  if(DB.plan.length&&!confirm("Clear today's plan?")) return;
+  DB.plan=[];
+  dbSave();
+  renderDbChecklist();
+  renderDbPlan();
+  dbUpdatePlanTotal();
+}
+
+function dbUpdatePlanTotal(){
+  const total=DB.plan.reduce((s,p)=>s+p.min,0);
+  const cap=DB.periodLen;
+  const diff=cap-total;
+  const el=document.getElementById('db-plan-total');
+  if(el){
+    el.style.color=diff<0?'var(--red)':diff===0?'var(--green)':'var(--text3)';
+    el.textContent=total+'/'+ cap+' min'+(diff>0?' ('+diff+' left)':diff<0?' ('+Math.abs(diff)+' over)':'');
+  }
+  // Also update badge in top row
+  const b=document.getElementById('db-time-left-badge');
+  if(b){ b.style.color=diff<0?'var(--red)':diff>0?'var(--green)':'var(--text3)'; b.textContent=diff===0?'✓ Exact fit':diff>0?diff+' min remaining':Math.abs(diff)+' min over'; }
+}
+
+function dbPeriodChange(){
+  const el=document.getElementById('db-period-len');
+  if(el){ DB.periodLen=+el.value||72; dbSave(); dbUpdatePlanTotal(); }
+}
+
+// ── Run timer ─────────────────────────────────────────────────────────────
+function dbRun(){
+  if(!DB.plan.length){ toast('Add some activities first!'); return; }
+  DB.runIdx=-1;
+  document.getElementById('db-timer-panel').style.display='block';
+  document.getElementById('db-timer-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  dbNext2();
+}
+
+function dbNext2(){
+  clearInterval(DB.timer);
+  DB.running=false;
+  DB.runIdx++;
+  if(DB.runIdx>=DB.plan.length){
+    document.getElementById('db-phase-label').textContent='CLASS COMPLETE 🎉';
+    document.getElementById('db-phase-name').textContent='All activities finished!';
+    document.getElementById('db-timer').textContent='—';
+    document.getElementById('db-timer').className='db-timer-dig';
+    document.getElementById('db-prog-fill').style.width='100%';
+    document.getElementById('db-station-row').style.display='none';
+    dbUpdateStrip();
+    dbUpdateProjector();
+    dbTone(880,300);
+    document.getElementById('db-run-btn').textContent='▶ Start Timer';
+    return;
+  }
+  const item=DB.plan[DB.runIdx];
+  const act=DB_ACTIVITIES.find(a=>a.id===item.actId)||{label:item.actId,color:'#888',emoji:'•'};
+  DB.timeLeft=item.min*60;
+  DB.totalTime=item.min*60;
+  document.getElementById('db-phase-label').textContent='Activity '+(DB.runIdx+1)+' of '+DB.plan.length;
+  document.getElementById('db-phase-name').textContent=act.emoji+' '+(item.customLabel||act.label);
+  document.getElementById('db-timer').className='db-timer-dig';
+  // Show station detail row if it's a station
+  const stRow=document.getElementById('db-station-row');
+  if(item.isStation && (item.stationLabel||item.stationGroup)){
+    stRow.style.display='flex';
+    stRow.innerHTML=`<div style="background:${act.color};color:#fff;padding:.3rem .8rem;border-radius:8px;font-size:13px;font-weight:600">${item.stationLabel||'Station'}</div>${item.stationGroup?'<div style="background:var(--s2);padding:.3rem .8rem;border-radius:8px;font-size:13px;color:var(--text2)">'+item.stationGroup+'</div>':''}`;
+  } else stRow.style.display='none';
+  dbUpdateStrip();
+  dbUpdateProjector();
+  dbStartTimer();
+}
+
+function dbStartTimer(){
+  DB.running=true;
+  document.getElementById('db-pause-btn').textContent='⏸ Pause';
+  document.getElementById('db-run-btn').textContent='▶ Running…';
+  clearInterval(DB.timer);
+  DB.timer=setInterval(()=>{
+    DB.timeLeft--;
+    const m=Math.floor(DB.timeLeft/60),s=DB.timeLeft%60;
+    const disp=m+':'+(s<10?'0':'')+s;
+    const tel=document.getElementById('db-timer');
+    const ptel=document.getElementById('proj-timer');
+    if(tel) tel.textContent=disp;
+    if(ptel) ptel.textContent=disp;
+    const pct=DB.totalTime>0?Math.round((1-DB.timeLeft/DB.totalTime)*100):0;
+    const pf=document.getElementById('db-prog-fill');
+    if(pf) pf.style.width=pct+'%';
+    if(tel){
+      if(DB.timeLeft<=60) tel.className='db-timer-dig urgent';
+      else if(DB.timeLeft<=120) tel.className='db-timer-dig warn';
+      else tel.className='db-timer-dig';
+    }
+    if(DB.timeLeft<=0){
+      clearInterval(DB.timer); DB.running=false;
+      dbTone(660,200);
+      // Flash title
+      const orig=document.title; document.title="⏰ Time's up!"; setTimeout(()=>document.title=orig,3000);
+      // Celebration banner
+      const cel=document.getElementById('celeb');
+      if(cel){ cel.textContent="Time's up — next activity!"; cel.classList.add('on'); setTimeout(()=>cel.classList.remove('on'),2500); }
+      setTimeout(()=>dbNext2(),2500);
+    }
+  },1000);
+}
+
+function dbNextItem(){ clearInterval(DB.timer); DB.running=false; dbNext2(); }
+function dbPauseResume(){
+  if(DB.running){ clearInterval(DB.timer); DB.running=false; document.getElementById('db-pause-btn').textContent='▶ Resume'; }
+  else if(DB.runIdx>=0 && DB.runIdx<DB.plan.length){ dbStartTimer(); }
+}
+function dbStop(){ clearInterval(DB.timer); DB.running=false; DB.runIdx=-1; document.getElementById('db-timer-panel').style.display='none'; document.getElementById('db-run-btn').textContent='▶ Start Timer'; }
+
+function dbUpdateStrip(){
+  const el=document.getElementById('db-strip'); if(!el) return;
+  el.innerHTML=DB.plan.map((item,i)=>{
+    const act=DB_ACTIVITIES.find(a=>a.id===item.actId)||{color:'#888',label:item.actId};
+    let cls='strip-item';
+    if(i<DB.runIdx) cls+=' strip-done';
+    else if(i===DB.runIdx) cls+=' strip-active';
+    const bg=i===DB.runIdx?act.color:'';
+    return `<div class="${cls}" style="${bg?'background:'+bg+';border-color:'+bg:''}" title="${act.label}">${act.label}</div>`;
+  }).join('');
+}
+
+function dbUpdateProjector(){
+  const pn=document.getElementById('proj-name'), pl=document.getElementById('proj-label'), ps=document.getElementById('proj-sub'), pst=document.getElementById('proj-stations');
+  if(!pn) return;
+  if(DB.runIdx<0||DB.runIdx>=DB.plan.length){ pl.textContent='Ready'; pn.textContent='Waiting to start…'; ps.textContent=''; if(pst) pst.innerHTML=''; return; }
+  const item=DB.plan[DB.runIdx];
+  const act=DB_ACTIVITIES.find(a=>a.id===item.actId)||{label:item.actId,color:'#888',emoji:'•'};
+  pl.textContent='Activity '+(DB.runIdx+1)+' of '+DB.plan.length+' · '+item.min+' min';
+  pn.textContent=act.emoji+' '+(item.customLabel||act.label);
+  ps.textContent=item.isStation&&item.stationLabel?item.stationLabel+(item.stationGroup?' — '+item.stationGroup:''):'';
+  // Station cards for all station items in the plan
+  if(pst){
+    const stationItems=DB.plan.filter(p=>p.isStation&&p.stationLabel);
+    if(stationItems.length>0){
+      pst.innerHTML=stationItems.map(p=>{
+        const a=DB_ACTIVITIES.find(x=>x.id===p.actId)||{color:'#888',emoji:'•'};
+        const isCurrent=p===item&&item.isStation;
+        return `<div style="background:${isCurrent?a.color:'rgba(255,255,255,.1)'};border-radius:14px;padding:1.4rem 1.8rem;min-width:160px;text-align:center;border:2px solid ${isCurrent?a.color:'rgba(255,255,255,.2)'}">
+          <div style="font-size:28px;margin-bottom:.4rem">${a.emoji}</div>
+          <div style="font-size:22px;font-weight:800;margin-bottom:.2rem">${p.stationLabel}</div>
+          <div style="font-size:16px;opacity:.8">${p.stationGroup||''}</div>
+          <div style="font-size:12px;opacity:.55;margin-top:.3rem">${a.label}</div>
+        </div>`;
+      }).join('');
+    } else pst.innerHTML='';
+  }
+}
+
+// ── Projector ─────────────────────────────────────────────────────────────
+function dbOpenProjector(){ const el=document.getElementById('projector-overlay'); if(el){el.style.display='flex';dbUpdateProjector();} }
+function dbCloseProjector(){ const el=document.getElementById('projector-overlay'); if(el) el.style.display='none'; }
+
+// ── Sound ─────────────────────────────────────────────────────────────────
+function dbTone(freq,dur){ try{ const ctx=new(window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g);g.connect(ctx.destination);o.frequency.value=freq;o.type='sine';g.gain.setValueAtTime(.4,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+dur/1000);o.start();o.stop(ctx.currentTime+dur/1000); }catch(e){} }
+
+// ── Class schedule ────────────────────────────────────────────────────────
+function renderDbSchedule(){
+  const el=document.getElementById('db-class-schedule'); if(!el) return;
+  const saved=dbScheduleLoad();
+  el.innerHTML=S.classes.map((cls,i)=>`
+    <div class="cls-sched-row">
+      <div style="display:flex;align-items:center;gap:.4rem;min-width:90px"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cls.color}"></span><span style="font-size:13px;font-weight:600;color:var(--text)">${cls.name}</span></div>
+      <span style="font-size:11px;color:var(--text3)">Start</span>
+      <input type="time" class="tminp" id="ds-s-${i}" value="${saved[i]?.start||''}" onchange="dbScheduleSave()">
+      <span style="font-size:11px;color:var(--text3)">End</span>
+      <input type="time" class="tminp" id="ds-e-${i}" value="${saved[i]?.end||''}" onchange="dbScheduleSave()">
+      <div class="cls-status" id="ds-st-${i}"></div>
+    </div>`).join('');
+  dbUpdateStatuses();
+}
+
+function dbUpdateStatuses(){
+  if(!S.classes.length) return;
+  const now=new Date(), nowMin=now.getHours()*60+now.getMinutes();
+  const toMin=t=>{ if(!t) return null; const[h,m]=t.split(':').map(Number); return h*60+m; };
+  let nextName='',nextMin=Infinity;
+  S.classes.forEach((_,i)=>{
+    const st=document.getElementById('ds-s-'+i)?.value||'';
+    const en=document.getElementById('ds-e-'+i)?.value||'';
+    const s=toMin(st),e=toMin(en);
+    const el=document.getElementById('ds-st-'+i); if(!el) return;
+    if(s!==null&&e!==null){
+      if(nowMin>=s&&nowMin<e){ el.className='cls-status cs-now'; el.textContent='● Now'; }
+      else if(nowMin<s){ const d=s-nowMin; el.className='cls-status cs-next'; el.textContent='in '+d+' min'; if(s<nextMin){nextMin=s;nextName=S.classes[i].name+' at '+st;} }
+      else { el.className='cls-status cs-done'; el.textContent='Done'; }
+    } else { el.className='cls-status cs-wait'; el.textContent='—'; }
+  });
+  const nc=document.getElementById('db-nextcls');
+  if(nc) nc.textContent=nextName?'Next: '+nextName:'';
+}
+
+// ── Class pills ───────────────────────────────────────────────────────────
+function renderDbClassPills(){
+  const el=document.getElementById('db-classpills'); if(!el) return;
+  el.innerHTML=S.classes.map((cls,i)=>`
+    <button class="ctab${DB.activeClassIdx===i?' on':''}" onclick="DB.activeClassIdx=${i};dbSave();renderDbClassPills();dbUpdateIxlLink()" style="font-size:12px;padding:4px 12px">
+      <span class="cdotsmall" style="background:${cls.color}"></span>${cls.name}
+    </button>`).join('');
+}
+
+function dbUpdateIxlLink(){
+  const el=document.getElementById('db-ixl-link'); if(!el) return;
+  const cls=S.classes[DB.activeClassIdx]||S.classes[0];
+  const g=cls?.grade||S.grade;
+  el.href=CUR[g]?.ixl||'#';
+}
+
+// ── Main entry ────────────────────────────────────────────────────────────
+function renderDashboard(){
+  dbLoad();
+  renderDbClassPills();
+  dbUpdateIxlLink();
+  const pl=document.getElementById('db-period-len'); if(pl) pl.value=DB.periodLen;
+  renderDbChecklist();
+  renderDbPlan();
+  dbUpdatePlanTotal();
+  renderDbSchedule();
+}
+
+// ── Clock ─────────────────────────────────────────────────────────────────
+function startDbClock(){
+  if(DB.clockInterval) clearInterval(DB.clockInterval);
+  const tick=()=>{
+    const now=new Date();
+    const el=document.getElementById('db-clock'); if(el) el.textContent=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const de=document.getElementById('db-date'); if(de) de.textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    dbUpdateStatuses();
+  };
+  tick();
+  DB.clockInterval=setInterval(tick,1000);
+}
+
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2800);}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+LOAD();
+if(S.setup&&S.classes.length>0) launch();
+else document.getElementById('wiz').style.display='flex';
+</script>
+</body>
+</html>
